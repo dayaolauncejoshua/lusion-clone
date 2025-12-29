@@ -1,34 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Suspense } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Scene() {
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      <mesh>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="#4a90e2" />
+      </mesh>
+      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={2} />
     </>
+  )
+}
+
+function App() {
+  return (
+    <div className="w-full h-screen">
+      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+        <Suspense fallback={null}>
+          <Scene />
+        </Suspense>
+      </Canvas>
+      
+      <div className="fixed top-10 left-10 z-10">
+        <h1 className="text-5xl font-bold">Lusion Clone</h1>
+        <p className="text-gray-400 mt-2">WebGL Experience</p>
+      </div>
+    </div>
   )
 }
 
