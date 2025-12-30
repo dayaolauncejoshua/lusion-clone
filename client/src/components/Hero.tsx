@@ -70,7 +70,7 @@ export default function Hero() {
 
           {/* MENU Button */}
           <button
-            className="relative text-xl font-medium text-black flex items-center gap-2"
+            className="relative px-8 py-3.5 text-xl font-medium text-black bg-gray-200 rounded-full flex items-center gap-2"
             onMouseEnter={() => setIsMenuHovered(true)}
             onMouseLeave={() => setIsMenuHovered(false)}
           >

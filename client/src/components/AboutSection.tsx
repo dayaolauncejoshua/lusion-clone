@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -10,45 +10,72 @@ export default function AboutSection() {
   const blueBoxRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
-useEffect(() => {
-  const ctx = gsap.context(() => {
-    // Headline animation
-    const headline = headlineRef.current
-    if (headline) {
-      const lines = headline.querySelectorAll('.headline-line')
-      
-      gsap.from(lines, {
+  // Array of video sources
+  const videos = [
+    'https://www.pexels.com/download/video/19836663/', // People celebrating/dancing
+    'https://www.pexels.com/download/video/35087112/', // Business people meeting/talking
+    'https://www.pexels.com/download/video/35131909/', // Team working together
+    'https://www.pexels.com/download/video/3188958/', // People in office/creative space
+    'https://www.pexels.com/download/video/10254613/', // Group collaboration/meeting
+  ]
+
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
+  const [videoOpacity, setVideoOpacity] = useState(1)
+
+  const handleVideoEnd = () => {
+    // Fade out
+    setVideoOpacity(0)
+    
+    // After fade out, change video
+    setTimeout(() => {
+      setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
+      // Fade in new video
+      setTimeout(() => {
+        setVideoOpacity(1)
+      }, 50)
+    }, 500)
+  }
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Headline animation
+      const headline = headlineRef.current
+      if (headline) {
+        const lines = headline.querySelectorAll('.headline-line')
+        
+        gsap.from(lines, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%',
+            end: 'top 30%',
+            scrub: 1,
+          },
+          y: 120,
+          opacity: 0,
+          stagger: 0.15,
+          ease: 'power3.out',
+        })
+      }
+
+      // Content fades out as we approach transition
+      gsap.to([headlineRef.current, contentRef.current, buttonRef.current], {
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 70%',
-          end: 'top 30%',
+          start: 'bottom bottom+=200',
+          end: 'bottom top+=200',
           scrub: 1,
         },
-        y: 120,
         opacity: 0,
-        stagger: 0.15,
-        ease: 'power3.out',
+        y: -30,
+        ease: 'power2.in',
       })
-    }
 
-    // Blue box fades out as we scroll to next section
-    gsap.to(blueBoxRef.current, {
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: 'bottom bottom',
-        end: 'bottom top',
-        scrub: 1,
-      },
-      opacity: 0,
-      scale: 0.9,
-      ease: 'power2.in',
-    })
+    }, sectionRef)
 
-  }, sectionRef)
-
-  return () => ctx.revert()
-}, [])
+    return () => ctx.revert()
+  }, [])
 
   return (
     <section
@@ -86,23 +113,30 @@ useEffect(() => {
             <div className="w-1/2">
               <div
                 ref={blueBoxRef}
+                id="morphing-video-box"
                 className="relative rounded-[2.5rem] overflow-hidden w-full"
                 style={{ 
                   minHeight: '450px',
                   background: 'linear-gradient(135deg, #5B8DEF 0%, #0F6FFF 100%)',
                 }}
               >
-                {/* Video filling the entire box */}
+                {/* Video filling the entire box - plays in sequence with smooth transition */}
                 <video
+                  ref={videoRef}
                   autoPlay
-                  loop
                   muted
                   playsInline
-                  className="w-full h-full object-cover opacity-70"
-                  style={{ minHeight: '450px' }}
+                  className="w-full h-full object-cover"
+                  style={{ 
+                    minHeight: '450px',
+                    opacity: videoOpacity,
+                    transition: 'opacity 0.5s ease-in-out'
+                  }}
+                  onEnded={handleVideoEnd}
+                  key={currentVideoIndex}
                 >
                   <source
-                    src="https://videos.pexels.com/video-files/3130284/3130284-uhd_2560_1440_30fps.mp4"
+                    src={videos[currentVideoIndex]}
                     type="video/mp4"
                   />
                   Your browser does not support the video tag.
@@ -129,7 +163,7 @@ useEffect(() => {
                 <span className="group-hover:-translate-x-8 transition-transform duration-300">
                   ABOUT US
                 </span>
-                <span className="absolute right-8 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-2xl font-bold">
+                <span className="absolute right-8 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-2xl font-bold ">
                   →
                 </span>
               </button>

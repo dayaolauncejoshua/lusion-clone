@@ -1,6 +1,7 @@
 import Hero from './components/Hero'
 import AboutSection from './components/AboutSection'
 import ReelSection from './components/ReelSection'
+import FeaturedWork from './components/FeaturedWork'
 import './index.css'
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
       <Hero />
       <AboutSection />
       <ReelSection />
+      <FeaturedWork />
     </div>
   )
 }
