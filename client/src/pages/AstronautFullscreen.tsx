@@ -123,6 +123,21 @@ export default function AstronautFullscreen() {
       }
       // SCROLL UP
       else if (e.deltaY < 0) {
+        // Navigate back when scrolling up at stage 0 with smooth transition
+        if (stage === 0) {
+          // Fade out the entire scene
+          gsap.to(containerRef.current, {
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+              navigate(-1); // Go back to previous page
+            },
+          });
+          return;
+        }
+
         // If footer is animating (not fully visible), reverse the animation
         if (
           stage === 3 &&
@@ -200,10 +215,6 @@ export default function AstronautFullscreen() {
               },
             });
           }
-        }
-        // Navigate back when scrolling up at stage 0
-        else if (stage === 0 && scrollCountRef.current === 0) {
-          navigate(-1); // Go back to previous page
         }
 
         if (scrollCountRef.current < 0) {
@@ -468,6 +479,7 @@ export default function AstronautFullscreen() {
           <div className="text-white text-xs sm:text-sm uppercase tracking-widest animate-bounce">
             Scroll to explore
           </div>
+          
         </div>
       )}
     </div>

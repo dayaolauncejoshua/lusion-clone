@@ -109,8 +109,8 @@ export default function AboutSection() {
                 id="morphing-video-box"
                 className="relative rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] overflow-hidden w-full"
                 style={{ 
-                  minHeight: '300px',
-                  height: '350px',
+                  minHeight: '400px',
+                  height: '450px',
                   background: 'linear-gradient(135deg, #5B8DEF 0%, #0F6FFF 100%)',
                 }}
               >

@@ -252,7 +252,7 @@ export default function ReelSection() {
       />
 
       {/* Container wrapper */}
-      <div className="relative w-full max-w-[1600px]">
+      <div className="relative w-full max-w-[1600px] ">
         {/* Top row - Plus icons (default state) */}
         <div
           className="absolute -top-10 left-0 text-2xl font-medium text-black transition-opacity duration-300"
