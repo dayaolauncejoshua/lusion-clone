@@ -29,24 +29,18 @@ export default function Hero() {
 
   return (
     <div className="relative w-full min-h-screen bg-[#f5f5f5]">
-      {/* Header */}
       <Header />
 
-      {/* Global mouse tracking overlay */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{ cursor: 'none' }}
-      />
+      <div className="fixed inset-0 pointer-events-none z-0" style={{ cursor: 'none' }} />
 
-      {/* Hero Content */}
-      <div className="relative w-full min-h-screen flex flex-col items-center justify-center px-12 pt-16">
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 pt-12 sm:pt-14 md:pt-16">
         {/* Title */}
         <div 
           ref={titleRef} 
-          className="text-center mb-12 max-w-4xl opacity-0"
+          className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12 max-w-4xl opacity-0 px-4"
           style={{ transform: 'translateY(30px)' }}
         >
-          <h1 className="text-3xl md:text-4xl lg:text-[3rem] font-normal leading-tight text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-[3rem] font-normal leading-tight text-black">
             We help brands create digital experiences that connect with their audience
           </h1>
         </div>
@@ -54,7 +48,7 @@ export default function Hero() {
         {/* 3D Canvas Container */}
         <div 
           ref={canvasRef} 
-          className="relative w-full max-w-[1750px] h-[820px] bg-black rounded-[2rem] overflow-hidden shadow-2xl opacity-0"
+          className="relative w-full max-w-[1750px] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[820px] bg-black rounded-2xl sm:rounded-3xl lg:rounded-[2rem] overflow-hidden shadow-2xl opacity-0"
           style={{ transform: 'scale(0.95)' }}
         >
           <Canvas
@@ -68,16 +62,16 @@ export default function Hero() {
           </Canvas>
         </div>
 
-        {/* Bottom Section - Plus Signs and Scroll Text Aligned */}
-        <div className="relative w-full max-w-[1440px] mt-0">
-          <div className="flex justify-between items-center px-0 py-1">
-            <div className="text-black text-3xl font-bold">+</div>
-            <div className="text-black text-3xl font-bold">+</div>
-            <div className="text-center text-md tracking-[0.3em] text-black font-medium">
+        {/* Bottom Section */}
+        <div className="relative w-full max-w-[1440px] mt-2 sm:mt-4 md:mt-0">
+          <div className="flex justify-between items-center px-2 sm:px-4 md:px-0 py-1">
+            <div className="text-black text-xl sm:text-2xl md:text-3xl font-bold">+</div>
+            <div className="text-black text-xl sm:text-2xl md:text-3xl font-bold hidden sm:block">+</div>
+            <div className="text-center text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-[0.3em] text-black font-medium">
               SCROLL TO EXPLORE
             </div>
-            <div className="text-black text-3xl font-bold">+</div>
-            <div className="text-black text-3xl font-bold">+</div>
+            <div className="text-black text-xl sm:text-2xl md:text-3xl font-bold hidden sm:block">+</div>
+            <div className="text-black text-xl sm:text-2xl md:text-3xl font-bold">+</div>
           </div>
         </div>
       </div>

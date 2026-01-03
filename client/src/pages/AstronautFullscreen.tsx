@@ -21,7 +21,6 @@ export default function AstronautFullscreen() {
   const scrollCountRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Animate Stage 1 text when it appears
   useEffect(() => {
     if (stage === 1 && textRef.current) {
       gsap.fromTo(
@@ -34,23 +33,45 @@ export default function AstronautFullscreen() {
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // If in stage 3 and footer is showing, allow normal scroll
-      if (stage === 3 && showFooter) {
-        return;
+      // If footer is fully visible, allow normal scrolling within footer
+      if (stage === 3 && showFooter && footerProgress === 1) {
+        // Check if user is scrolling up at the top of the footer
+        const footerElement = document.querySelector("footer");
+        if (footerElement && e.deltaY < 0) {
+          const isAtTop = footerElement.scrollTop === 0 || window.scrollY === 0;
+
+          if (isAtTop) {
+            // User is at top of footer and scrolling up - slide footer down
+            e.preventDefault();
+            gsap.to(
+              {},
+              {
+                duration: 1.5,
+                ease: "power2.inOut",
+                onUpdate: function () {
+                  setFooterProgress(1 - this.progress());
+                },
+                onComplete: () => {
+                  setShowFooter(false);
+                  setFooterProgress(0);
+                },
+              }
+            );
+          }
+        }
+        return; // Allow normal scroll otherwise
       }
 
+      // Prevent default for all other scroll behaviors
       e.preventDefault();
 
       // SCROLL DOWN
       if (e.deltaY > 0) {
         scrollCountRef.current++;
 
-        // Stage 0 → Stage 1
         if (scrollCountRef.current === 1 && stage === 0) {
           setStage(1);
-        }
-        // Stage 1 → Stage 2 (tunnel animation forward)
-        else if (scrollCountRef.current >= 2 && stage === 1) {
+        } else if (scrollCountRef.current >= 2 && stage === 1) {
           setStage(2);
 
           if (textRef.current) {
@@ -83,41 +104,49 @@ export default function AstronautFullscreen() {
               },
             }
           );
-        }
-        // Stage 3 - Show footer sliding up
-        else if (stage === 3 && showFinalUI && !showFooter) {
+        } else if (stage === 3 && showFinalUI && !showFooter) {
           setShowFooter(true);
-          
-          gsap.to({}, {
-            duration: 1.5,
-            ease: "power2.inOut",
-            onUpdate: function() {
-              setFooterProgress(this.progress());
+
+          gsap.to(
+            {},
+            {
+              duration: 1.5,
+              ease: "power2.inOut",
+              onUpdate: function () {
+                setFooterProgress(this.progress());
+              },
             }
-          });
+          );
         }
       }
       // SCROLL UP
       else if (e.deltaY < 0) {
-        // If footer is visible and at top, hide it first
-        if (stage === 3 && showFooter && footerProgress >= 0.1) {
-          gsap.to({}, {
-            duration: 1.5,
-            ease: "power2.inOut",
-            onUpdate: function() {
-              setFooterProgress(1 - this.progress());
-            },
-            onComplete: () => {
-              setShowFooter(false);
-              setFooterProgress(0);
+        // If footer is animating (not fully visible), reverse the animation
+        if (
+          stage === 3 &&
+          showFooter &&
+          footerProgress < 1 &&
+          footerProgress > 0
+        ) {
+          gsap.to(
+            {},
+            {
+              duration: 1.5,
+              ease: "power2.inOut",
+              onUpdate: function () {
+                setFooterProgress(1 - this.progress());
+              },
+              onComplete: () => {
+                setShowFooter(false);
+                setFooterProgress(0);
+              },
             }
-          });
+          );
           return;
         }
 
         scrollCountRef.current--;
 
-        // Stage 3 → Stage 2 → Stage 1 (REVERSE tunnel animation)
         if (stage === 3 && scrollCountRef.current <= 1 && !showFooter) {
           scrollCountRef.current = 1;
 
@@ -130,7 +159,7 @@ export default function AstronautFullscreen() {
               onComplete: () => {
                 setShowFinalUI(false);
                 setStage(2);
-                
+
                 gsap.fromTo(
                   {},
                   { progress: 1 },
@@ -138,10 +167,10 @@ export default function AstronautFullscreen() {
                     progress: 0,
                     duration: 10,
                     ease: "power1.inOut",
-                    onUpdate: function() {
+                    onUpdate: function () {
                       const reverseProgress = this.targets()[0].progress;
                       setTunnelProgress(reverseProgress);
-                      
+
                       if (astronautRef.current) {
                         astronautRef.current.animateForward(reverseProgress);
                       }
@@ -149,15 +178,13 @@ export default function AstronautFullscreen() {
                     onComplete: () => {
                       setStage(1);
                       setTunnelProgress(0);
-                    }
+                    },
                   }
                 );
               },
             });
           }
-        }
-        // Stage 1 → Stage 0
-        else if (stage === 1 && scrollCountRef.current <= 0) {
+        } else if (stage === 1 && scrollCountRef.current <= 0) {
           scrollCountRef.current = 0;
 
           if (textRef.current) {
@@ -186,7 +213,6 @@ export default function AstronautFullscreen() {
     };
   }, [stage, showFooter, showFinalUI, footerProgress]);
 
-  // NBA-style letter animation when final UI shows
   useEffect(() => {
     if (showFinalUI && finalTextRef.current) {
       const tl = gsap.timeline({ delay: 0.5 });
@@ -269,7 +295,6 @@ export default function AstronautFullscreen() {
     }
   }, [showFinalUI]);
 
-  // Continuous random letter flip animation
   useEffect(() => {
     if (!showFinalUI) return;
 
@@ -311,13 +336,14 @@ export default function AstronautFullscreen() {
   }, [showFinalUI]);
 
   return (
-    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden">
-      {/* Sticky Header */}
+    <div
+      ref={containerRef}
+      className="relative w-screen h-screen overflow-hidden"
+    >
       <div className="fixed top-0 left-0 right-0 z-[200]">
         <Header darkMode={stage < 3} />
       </div>
 
-      {/* Astronaut Scene - Fixed background */}
       <div className="fixed inset-0 pointer-events-none">
         <Astronaut3D
           ref={astronautRef}
@@ -327,15 +353,14 @@ export default function AstronautFullscreen() {
         />
       </div>
 
-      {/* Initial scroll-triggered text */}
       {stage === 1 && (
         <div
           ref={textRef}
-          className="fixed inset-0 flex items-center justify-center pointer-events-none z-10"
+          className="fixed inset-0 flex items-center justify-center pointer-events-none z-10 px-4 sm:px-6 md:px-8"
           style={{ perspective: "1000px" }}
         >
-          <div className="text-center px-8">
-            <h1 className="text-6xl md:text-8xl font-bold text-white leading-tight tracking-tight">
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold text-white leading-tight tracking-tight">
               STEP INTO A NEW WORLD
               <br />
               AND LET YOUR
@@ -346,19 +371,18 @@ export default function AstronautFullscreen() {
         </div>
       )}
 
-      {/* Final UI */}
       {showFinalUI && (
         <>
           <div
             ref={finalTextRef}
-            className="fixed inset-0 flex flex-col items-center justify-center z-[100] pointer-events-none"
+            className="fixed inset-0 flex flex-col items-center justify-center z-[100] pointer-events-none px-4 sm:px-6 md:px-8"
           >
-            <div className="text-center px-8 max-w-7xl mx-auto">
-              <p className="text-md uppercase tracking-[0.2em] text-white/90 mb-4 font-normal">
+            <div className="text-center max-w-7xl mx-auto">
+              <p className="text-xs sm:text-sm md:text-base uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/90 mb-3 sm:mb-4 font-normal">
                 IS YOUR BIG IDEA READY TO GO WILD?
               </p>
               <h1
-                className="text-[8rem] md:text-[11rem] lg:text-[13rem] font-normal text-white leading-[0.85] drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[8rem] 2xl:text-[11rem] 3xl:text-[13rem] font-normal text-white leading-[0.85] drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]"
                 style={{ perspective: "1000px" }}
               >
                 <div ref={letsLettersRef} className="inline-block">
@@ -401,10 +425,10 @@ export default function AstronautFullscreen() {
             </div>
           </div>
 
-          <div className="fixed bottom-12 left-0 right-0 flex justify-center z-[100]">
+          <div className="fixed bottom-8 sm:bottom-10 md:bottom-12 left-0 right-0 flex justify-center z-[100] px-4">
             <button
               ref={buttonLettersRef}
-              className="px-10 py-5 bg-white text-black rounded-full text-md font-medium hover:bg-gray-100 transition-all uppercase tracking-wider shadow-2xl pointer-events-auto"
+              className="px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 bg-white text-black rounded-full text-xs sm:text-sm md:text-base font-medium hover:bg-gray-100 transition-all uppercase tracking-wider shadow-2xl pointer-events-auto"
               style={{ perspective: "1000px" }}
             >
               {"↓ CONTINUE TO SCROLL ↓".split("").map((char, i) => (
@@ -421,23 +445,21 @@ export default function AstronautFullscreen() {
         </>
       )}
 
-      {/* Footer sliding up from bottom */}
       {showFooter && (
         <div
           className="fixed inset-0 z-[150]"
           style={{
             transform: `translateY(${100 - footerProgress * 100}%)`,
-            transition: footerProgress === 0 ? 'none' : undefined
+            transition: footerProgress === 0 ? "none" : undefined,
           }}
         >
           <Footer />
         </div>
       )}
 
-      {/* Initial scroll indicator */}
       {stage === 0 && (
-        <div className="fixed bottom-12 left-0 right-0 flex justify-center items-center z-10">
-          <div className="text-white text-sm uppercase tracking-widest animate-bounce">
+        <div className="fixed bottom-8 sm:bottom-10 md:bottom-12 left-0 right-0 flex justify-center items-center z-10">
+          <div className="text-white text-xs sm:text-sm uppercase tracking-widest animate-bounce">
             Scroll to explore
           </div>
         </div>

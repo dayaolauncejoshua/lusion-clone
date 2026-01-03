@@ -12,26 +12,21 @@ export default function AboutSection() {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Array of video sources
   const videos = [
-    'https://www.pexels.com/download/video/19836663/', // People celebrating/dancing
-    'https://www.pexels.com/download/video/35087112/', // Business people meeting/talking
-    'https://www.pexels.com/download/video/35131909/', // Team working together
-    'https://www.pexels.com/download/video/3188958/', // People in office/creative space
-    'https://www.pexels.com/download/video/10254613/', // Group collaboration/meeting
+    'https://www.pexels.com/download/video/19836663/',
+    'https://www.pexels.com/download/video/35087112/',
+    'https://www.pexels.com/download/video/35131909/',
+    'https://www.pexels.com/download/video/3188958/',
+    'https://www.pexels.com/download/video/10254613/',
   ]
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
   const [videoOpacity, setVideoOpacity] = useState(1)
 
   const handleVideoEnd = () => {
-    // Fade out
     setVideoOpacity(0)
-    
-    // After fade out, change video
     setTimeout(() => {
       setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
-      // Fade in new video
       setTimeout(() => {
         setVideoOpacity(1)
       }, 50)
@@ -40,7 +35,6 @@ export default function AboutSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Headline animation
       const headline = headlineRef.current
       if (headline) {
         const lines = headline.querySelectorAll('.headline-line')
@@ -59,7 +53,6 @@ export default function AboutSection() {
         })
       }
 
-      // Content fades out as we approach transition
       gsap.to([headlineRef.current, contentRef.current, buttonRef.current], {
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -80,25 +73,25 @@ export default function AboutSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen bg-[#f5f5f5] py-32 overflow-hidden"
+      className="relative min-h-screen bg-[#f5f5f5] py-16 sm:py-20 md:py-24 lg:py-32 overflow-hidden"
     >
-      <div className="relative w-full px-16">
+      <div className="relative w-full px-4 sm:px-6 md:px-10 lg:px-16">
         {/* Large Headline */}
-        <div ref={headlineRef} className="mb-10 pl-32">
-          <div className="headline-line text-[10rem] font-normal leading-[0.85] text-black tracking-tight">
+        <div ref={headlineRef} className="mb-6 sm:mb-8 md:mb-10 pl-0 sm:pl-8 md:pl-16 lg:pl-32">
+          <div className="headline-line text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[10rem] font-normal leading-[0.85] text-black tracking-tight">
             Beyond Visions
           </div>
-          <div className="headline-line text-[10rem] font-normal leading-[1.5] text-black tracking-tight">
+          <div className="headline-line text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[10rem] font-normal leading-[1.5] text-black tracking-tight">
             Within Reach
           </div>
         </div>
 
         {/* Content Container */}
         <div className="relative">
-          {/* Top: Paragraph (Right aligned) */}
-          <div className="flex justify-end">
+          {/* Top: Paragraph */}
+          <div className="flex justify-start lg:justify-end mb-6 sm:mb-8 md:mb-10 lg:mb-0">
             <div ref={contentRef} className="max-w-3xl">
-              <p className="text-3xl leading-relaxed text-black" style={{ lineHeight: '1.5' }}>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-black" style={{ lineHeight: '1.5' }}>
                 Lusion is a digital production studio that brings your ideas to life through
                 visually captivating designs and interactive experiences. With our talented team,
                 we push the boundaries by solving complex problems, delivering tailored solutions
@@ -107,20 +100,20 @@ export default function AboutSection() {
             </div>
           </div>
 
-          {/* Bottom: Blue Box (Left) + About Us Button (Right) */}
-          <div className="flex items-start justify-between gap-12">
+          {/* Bottom: Blue Box + Button */}
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-6 sm:gap-8 md:gap-10 lg:gap-12">
             {/* Left Side - Blue Box */}
-            <div className="w-1/2">
+            <div className="w-full lg:w-1/2">
               <div
                 ref={blueBoxRef}
                 id="morphing-video-box"
-                className="relative rounded-[2.5rem] overflow-hidden w-full"
+                className="relative rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] overflow-hidden w-full"
                 style={{ 
-                  minHeight: '450px',
+                  minHeight: '300px',
+                  height: '350px',
                   background: 'linear-gradient(135deg, #5B8DEF 0%, #0F6FFF 100%)',
                 }}
               >
-                {/* Video filling the entire box - plays in sequence with smooth transition */}
                 <video
                   ref={videoRef}
                   autoPlay
@@ -128,21 +121,16 @@ export default function AboutSection() {
                   playsInline
                   className="w-full h-full object-cover"
                   style={{ 
-                    minHeight: '450px',
+                    minHeight: '300px',
                     opacity: videoOpacity,
                     transition: 'opacity 0.5s ease-in-out'
                   }}
                   onEnded={handleVideoEnd}
                   key={currentVideoIndex}
                 >
-                  <source
-                    src={videos[currentVideoIndex]}
-                    type="video/mp4"
-                  />
-                  Your browser does not support the video tag.
+                  <source src={videos[currentVideoIndex]} type="video/mp4" />
                 </video>
                 
-                {/* Blue overlay to tint the video */}
                 <div 
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -154,16 +142,16 @@ export default function AboutSection() {
             </div>
 
             {/* Right Side - About Us Button */}
-            <div className="flex-1 flex justify-start items-end pb-8 pt-10 pl-16">
+            <div className="flex-1 flex justify-start lg:justify-start items-start lg:items-end lg:pb-8 lg:pt-10 lg:pl-16">
               <button
                 ref={buttonRef}
-                className="group relative flex items-center gap-3 px-8 py-4 bg-white text-black rounded-full text-lg font-medium hover:bg-[#0044ff] hover:text-white transition-all duration-300 shadow-lg border border-gray-200 overflow-hidden"
+                className="group relative flex items-center gap-2 sm:gap-3 px-5 sm:px-6 md:px-7 lg:px-8 py-3 sm:py-3.5 md:py-4 bg-white text-black rounded-full text-sm sm:text-base md:text-lg font-medium hover:bg-[#0044ff] hover:text-white transition-all duration-300 shadow-lg border border-gray-200 overflow-hidden"
               >
-                <span className="w-3 h-3 bg-black rounded-full group-hover:opacity-0 group-hover:scale-0 transition-all duration-300" />
-                <span className="group-hover:-translate-x-8 transition-transform duration-300">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-black rounded-full group-hover:opacity-0 group-hover:scale-0 transition-all duration-300" />
+                <span className="group-hover:-translate-x-6 sm:group-hover:-translate-x-7 md:group-hover:-translate-x-8 transition-transform duration-300">
                   ABOUT US
                 </span>
-                <span className="absolute right-8 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-2xl font-bold ">
+                <span className="absolute right-6 sm:right-7 md:right-8 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-xl sm:text-2xl font-bold">
                   →
                 </span>
               </button>
