@@ -131,7 +131,7 @@ export default function ConnectingSection() {
             style={{ aspectRatio: '4/3' }}
           >
             <div className="relative w-full h-full bg-gray-900 rounded-xl sm:rounded-2xl lg:rounded-[2.5rem] overflow-hidden">
-              <Astronaut3D />
+              <Astronaut3D stage={1} tunnelProgress={0} showStickers={false} />
             </div>
           </div>
           

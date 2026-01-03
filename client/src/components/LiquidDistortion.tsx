@@ -135,7 +135,7 @@ export default function LiquidDistortion() {
 
       if (speed > 1) {
         // Cycle through beautiful colors
-        const selectedColor = colorPalette[colorCounter % colorPalette.length];
+        // const _selectedColor = colorPalettes[currentPaletteIndex][colorIndex]
         colorCounter++;
         
         trail.push({

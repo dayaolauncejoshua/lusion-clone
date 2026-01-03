@@ -92,7 +92,7 @@ function FloatingSticker({ sticker }: { sticker: Sticker }) {
 function ShiningDiamonds() {
   const diamondsRef = useRef<THREE.Group>(null)
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (diamondsRef.current) {
       diamondsRef.current.children.forEach((child, i) => {
         child.position.y += (0.28 + (i % 5) * 0.12) * delta
