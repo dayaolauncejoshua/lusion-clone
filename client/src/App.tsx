@@ -6,6 +6,8 @@ import ReelSection from './components/ReelSection'
 import FeaturedWork from './components/FeaturedWork'
 import ConnectingSection from './components/ConnectingSection'
 import AstronautFullscreen from './pages/AstronautFullscreen'
+import LiquidDistortion from './components/LiquidDistortion'
+
 import './index.css'
 
 function HomePage() {
@@ -23,7 +25,10 @@ function HomePage() {
 function App() {
   return (
     <BrowserRouter>
-      
+
+    {/* Liquid distortion effect */}
+      <LiquidDistortion />
+
       
       <PageTransition>
         <Routes>

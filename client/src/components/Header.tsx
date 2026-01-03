@@ -1,16 +1,26 @@
 import { useState } from 'react'
 
-export default function Header() {
+interface HeaderProps {
+  darkMode?: boolean
+}
+
+export default function Header({ darkMode = false }: HeaderProps) {
   const [isTalkHovered, setIsTalkHovered] = useState(false)
   const [isMenuHovered, setIsMenuHovered] = useState(false)
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-16 py-8 flex items-center justify-between">
-      <div className="text-5xl font-medium tracking-tight text-black">LUSION</div>
+      <div className={`text-5xl font-medium tracking-tight ${darkMode ? 'text-white' : 'text-black'}`}>
+        LUSION
+      </div>
       <div className="flex items-center gap-6">
         {/* LET'S TALK Button */}
         <button
-          className="relative px-8 py-3.5 bg-black text-white rounded-full text-xl font-medium overflow-hidden transition-all duration-300 hover:bg-[#0044ff]"
+          className={`relative px-8 py-3.5 rounded-full text-xl font-medium overflow-hidden transition-all duration-300 ${
+            darkMode 
+              ? 'bg-white text-black hover:bg-[#0044ff] hover:text-white' 
+              : 'bg-black text-white hover:bg-[#0044ff]'
+          }`}
           onMouseEnter={() => setIsTalkHovered(true)}
           onMouseLeave={() => setIsTalkHovered(false)}
         >
@@ -35,7 +45,9 @@ export default function Header() {
             
             {/* Dot - hides on hover */}
             <span
-              className={`w-2 h-2 rounded-full bg-white transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                darkMode ? 'bg-black' : 'bg-white'
+              } ${
                 isTalkHovered ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
               }`}
             />
@@ -44,7 +56,11 @@ export default function Header() {
 
         {/* MENU Button */}
         <button
-          className="relative px-8 py-3.5 text-xl font-medium text-black bg-gray-200 rounded-full flex items-center gap-2"
+          className={`relative px-8 py-3.5 text-xl font-medium rounded-full flex items-center gap-2 ${
+            darkMode 
+              ? 'text-white bg-white/10 backdrop-blur-sm' 
+              : 'text-black bg-gray-200'
+          }`}
           onMouseEnter={() => setIsMenuHovered(true)}
           onMouseLeave={() => setIsMenuHovered(false)}
         >
@@ -58,8 +74,8 @@ export default function Header() {
                 isMenuHovered ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-black" />
-              <span className="w-1.5 h-1.5 rounded-full bg-black" />
+              <span className={`w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-white' : 'bg-black'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-white' : 'bg-black'}`} />
             </span>
             
             {/* Vertical Dots (hover state) */}
@@ -68,8 +84,8 @@ export default function Header() {
                 isMenuHovered ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-black" />
-              <span className="w-1.5 h-1.5 rounded-full bg-black" />
+              <span className={`w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-white' : 'bg-black'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${darkMode ? 'bg-white' : 'bg-black'}`} />
             </span>
           </span>
         </button>
