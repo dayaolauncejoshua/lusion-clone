@@ -4,6 +4,7 @@ import type { Astronaut3DRef } from "../components/Astronaut3D";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import gsap from "gsap";
+import { useNavigate } from "react-router-dom";
 
 export default function AstronautFullscreen() {
   const [stage, setStage] = useState(0);
@@ -20,6 +21,7 @@ export default function AstronautFullscreen() {
   const astronautRef = useRef<Astronaut3DRef>(null);
   const scrollCountRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (stage === 1 && textRef.current) {
@@ -198,6 +200,10 @@ export default function AstronautFullscreen() {
               },
             });
           }
+        }
+        // Navigate back when scrolling up at stage 0
+        else if (stage === 0 && scrollCountRef.current === 0) {
+          navigate(-1); // Go back to previous page
         }
 
         if (scrollCountRef.current < 0) {
