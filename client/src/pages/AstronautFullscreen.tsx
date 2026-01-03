@@ -341,7 +341,7 @@ export default function AstronautFullscreen() {
       className="relative w-screen h-screen overflow-hidden"
     >
       <div className="fixed top-0 left-0 right-0 z-[200]">
-        <Header darkMode={stage < 3} />
+        <Header darkMode={!showFooter} />
       </div>
 
       <div className="fixed inset-0 pointer-events-none">
