@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import ParticleHero from '../components/ParticleHero'
 import Header from '../components/Header'
+import ClientsSection from '../components/ClientsSection'
 
 export default function AboutUs() {
   return (
@@ -12,6 +13,11 @@ export default function AboutUs() {
 
       {/* Fixed Particle Hero Section with scroll transitions */}
       <ParticleHero />
+
+       {/* Normal scrollable content starts here */}
+      <div className="relative z-30">
+        <ClientsSection />
+      </div>
     </div>
   )
 }

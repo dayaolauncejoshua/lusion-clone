@@ -21,11 +21,11 @@ const teamMembers = [
       "With years of experience in 3D motion design, Paul brings creative vision to life through stunning visual narratives that captivate audiences and elevate brand storytelling.",
   },
   {
-    name: "Marco Ludovico Perego",
+    name: "Mia Ludovico Perego",
     role: "CREATIVE DEVELOPER",
     modelPath: "/models/faces/person3.glb",
     description:
-      "Marco combines technical expertise with creative innovation to build immersive digital experiences that push the boundaries of what's possible on the web.",
+      "Mia combines technical expertise with creative innovation to build immersive digital experiences that push the boundaries of what's possible on the web.",
   },
 ];
 
@@ -74,7 +74,7 @@ function LoadingFallback() {
   );
 }
 
-// 3D Face Model Component with Lusion.co style
+// 3D Face Model Component with Grayish-Blue Duotone
 function FaceModel({ modelPath }: { modelPath: string }) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(modelPath);
@@ -122,7 +122,6 @@ function FaceModel({ modelPath }: { modelPath: string }) {
       const time = state.clock.elapsedTime;
 
       for (let i = 0; i < positions.length; i += 3) {
-        // Subtle wave effect
         positions[i + 2] += Math.sin(time * 2 + positions[i] * 5) * 0.001;
       }
 
@@ -150,7 +149,6 @@ function FaceModel({ modelPath }: { modelPath: string }) {
           const maxDim = Math.max(size.x, size.y, size.z);
           const scale = 3.5 / maxDim;
 
-          // Dense particle sampling for smoother look
           for (let i = 0; i < positionAttribute.count; i += 2) {
             const x = (positionAttribute.getX(i) - center.x) * scale;
             const y = (positionAttribute.getY(i) - center.y) * scale;
@@ -162,25 +160,42 @@ function FaceModel({ modelPath }: { modelPath: string }) {
             const sizeVariation = 0.8 + Math.random() * 0.4;
             sizes.push(sizeVariation);
 
-            // Color variation for rim lighting effect
+            // Calculate lighting and depth for color variation
             let brightness = 0.5;
+            let rimEffect = 0;
+
             if (normalAttribute) {
               const nx = normalAttribute.getX(i);
               const ny = normalAttribute.getY(i);
               const nz = normalAttribute.getZ(i);
 
-              // Rim lighting: brighter on edges
+              // Rim lighting calculation
               const viewVector = new THREE.Vector3(0, 0, 1);
               const normalVector = new THREE.Vector3(nx, ny, nz).normalize();
               const dot = Math.abs(viewVector.dot(normalVector));
-              brightness = 1 - dot; // Inverse for rim effect
+
+              rimEffect = 1 - dot; // Stronger on edges
+              brightness = 0.3 + dot * 0.7; // Darker on edges, lighter on front
             }
 
-            // Blue gradient
+            // Depth-based variation (y position affects tone)
+            const depthFactor = (y + 2) / 4; // Normalize y position
+
+            // Grayish-blue duotone with skin tone preservation
+            // Base gray-blue color
+            const baseGray = 0.45 + brightness * 0.25;
+            const baseBlue = 0.55 + brightness * 0.35;
+
+            // Add blue glow on rims
+            const rimBlue = rimEffect * 0.4;
+
+            // Subtle warm tone to preserve skin feel
+            const skinWarmth = depthFactor * 0.1;
+
             colors.push(
-              0.2 + brightness * 0.3, // R
-              0.6 + brightness * 0.4, // G
-              1.0 // B
+              baseGray + skinWarmth + rimBlue * 0.3, // R - gray with slight warmth
+              baseGray + rimBlue * 0.5, // G - gray with blue tint
+              baseBlue + rimBlue // B - blue dominant
             );
           }
         }
@@ -206,7 +221,6 @@ function FaceModel({ modelPath }: { modelPath: string }) {
     return particleGeometry;
   }, [scene]);
 
-  // Custom shader material for better particle rendering
   const particleMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
@@ -235,8 +249,12 @@ function FaceModel({ modelPath }: { modelPath: string }) {
         
         void main() {
           vec4 texColor = texture2D(pointTexture, gl_PointCoord);
-          gl_FragColor = vec4(vColor, 1.0) * texColor;
-          gl_FragColor.a *= 0.9;
+          
+          // Grayish-blue tint with soft glow
+          vec3 finalColor = vColor * 1.2; // Slight boost
+          
+          gl_FragColor = vec4(finalColor, 1.0) * texColor;
+          gl_FragColor.a *= 0.85;
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -259,47 +277,103 @@ function FaceModel({ modelPath }: { modelPath: string }) {
   );
 }
 
-// Blue Cursor Follower - fixed version
+// Blue Cursor Follower with directional arrows
+// Blue Cursor Follower with directional arrows - NO BLINKING
 function BlueCursor({
   mousePosition,
+  isInTeamSection,
+  isLeftSide,
+  onPrevious,
+  onNext,
 }: {
   mousePosition: { x: number; y: number } | null;
+  isInTeamSection: boolean;
+  isLeftSide: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
 }) {
   const cursorRef = useRef<HTMLDivElement>(null);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
     if (!cursorRef.current || !mousePosition) return;
 
-    gsap.to(cursorRef.current, {
-      x: mousePosition.x - 40,
-      y: mousePosition.y - 40,
-      duration: 0.15,
-      ease: "power2.out",
-    });
+    // Set initial position immediately without animation
+    if (!isInitializedRef.current) {
+      gsap.set(cursorRef.current, {
+        x: mousePosition.x - 40,
+        y: mousePosition.y - 40,
+      });
+      isInitializedRef.current = true;
+    } else {
+      // Animate subsequent movements
+      gsap.to(cursorRef.current, {
+        x: mousePosition.x - 40,
+        y: mousePosition.y - 40,
+        duration: 0.15,
+        ease: "power2.out",
+      });
+    }
   }, [mousePosition]);
 
+  // Always render but hide when not needed
   if (!mousePosition) return null;
+
+  const handleClick = () => {
+    if (!isInTeamSection) return;
+    
+    if (isLeftSide) {
+      onPrevious();
+    } else {
+      onNext();
+    }
+  };
 
   return (
     <div
       ref={cursorRef}
-      className="fixed pointer-events-none z-50 w-20 h-20"
-      style={{ left: 0, top: 0 }}
+      onClick={handleClick}
+      className="fixed z-50 w-20 h-20 transition-opacity duration-200"
+      style={{ 
+        left: 0, 
+        top: 0,
+        opacity: isInTeamSection ? 1 : 0,
+        pointerEvents: isInTeamSection ? 'auto' : 'none',
+        cursor: isInTeamSection ? 'pointer' : 'default'
+      }}
     >
-      <div className="w-full h-full rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
+      <div className="w-full h-full rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50 transition-transform hover:scale-110">
+        {isLeftSide ? (
+          // Left arrow for previous
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        ) : (
+          // Right arrow for next
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        )}
       </div>
     </div>
   );
@@ -343,7 +417,7 @@ function BlueCursor({
 //   )
 // }
 
-// Matrix Rain Component
+// Matrix Rain Component - Cyan/Blue color like lusion.co
 function MatrixRain() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -364,8 +438,7 @@ function MatrixRain() {
       drops[i] = Math.random() * -100;
     }
 
-    const chars =
-      "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
 
     function draw() {
       if (!ctx || !canvas) return;
@@ -373,7 +446,8 @@ function MatrixRain() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = "#0f0";
+      // Cyan/blue color like lusion.co
+      ctx.fillStyle = "#00d9ff";
       ctx.font = "14px monospace";
 
       for (let i = 0; i < drops.length; i++) {
@@ -402,99 +476,247 @@ function MatrixRain() {
   );
 }
 
-// Team Section Component with Navigation - FIXED
+// Animated Matrix Code Component
+function AnimatedMatrixCode() {
+  const [code, setCode] = useState("");
+
+  useEffect(() => {
+    const chars = "0123456789ABCDEFGHIJKLMNOP";
+    const interval = setInterval(() => {
+      let newCode = "";
+      for (let i = 0; i < 8; i++) {
+        newCode += chars[Math.floor(Math.random() * chars.length)];
+      }
+      setCode(newCode);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="font-mono text-md text-white opacity-70">{code}</span>
+  );
+}
+
+// Team Section Component - Fixed auto-loop carousel
 function TeamSection({ isVisible }: { isVisible: boolean }) {
   const [currentMemberIndex, setCurrentMemberIndex] = useState(0);
-  const [mousePosition, setMousePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
   const [isLeftSide, setIsLeftSide] = useState(false);
   const [globalMousePosition, setGlobalMousePosition] = useState<{
     x: number;
     y: number;
   } | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const faceContainerRef = useRef<HTMLDivElement>(null);
   const memberInfoRef = useRef<HTMLDivElement>(null);
+  const autoLoopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentIndexRef = useRef(currentMemberIndex); // Keep track of current index
 
   const currentMember = teamMembers[currentMemberIndex];
 
+  // Update ref when index changes
   useEffect(() => {
-    if (!isVisible) return;
+    currentIndexRef.current = currentMemberIndex;
+  }, [currentMemberIndex]);
 
+  // Track mouse globally and determine left/right side
+  useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       setGlobalMousePosition({ x: e.clientX, y: e.clientY });
+      
+      // Determine left/right based on screen center
+      const screenCenter = window.innerWidth / 2;
+      setIsLeftSide(e.clientX < screenCenter);
     };
 
     window.addEventListener("mousemove", handleGlobalMouseMove);
     return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
-  }, [isVisible]);
+  }, []);
+
+  // Auto-loop functionality - 5 second interval - FIXED
+  useEffect(() => {
+    if (!isVisible) return;
+
+    // Clear existing timer
+    if (autoLoopTimerRef.current) {
+      clearInterval(autoLoopTimerRef.current);
+    }
+
+    // Start new timer - use ref to get current index
+    autoLoopTimerRef.current = setInterval(() => {
+      if (isTransitioning) return;
+      
+      const nextIndex = (currentIndexRef.current + 1) % teamMembers.length;
+      animateTransition(nextIndex, 'next');
+    }, 5000); // 5 seconds
+
+    return () => {
+      if (autoLoopTimerRef.current) {
+        clearInterval(autoLoopTimerRef.current);
+      }
+    };
+  }, [isVisible]); // Only depend on isVisible, not currentMemberIndex
 
   const handleNext = () => {
+    if (isTransitioning) return;
+    
+    // Clear and restart auto-loop timer
+    if (autoLoopTimerRef.current) {
+      clearInterval(autoLoopTimerRef.current);
+    }
+
     const nextIndex = (currentMemberIndex + 1) % teamMembers.length;
-    animateTransition(nextIndex);
+    animateTransition(nextIndex, 'next');
+
+    // Restart auto-loop
+    autoLoopTimerRef.current = setInterval(() => {
+      if (isTransitioning) return;
+      const next = (currentIndexRef.current + 1) % teamMembers.length;
+      animateTransition(next, 'next');
+    }, 5000);
   };
 
   const handlePrevious = () => {
+    if (isTransitioning) return;
+    
+    // Clear and restart auto-loop timer
+    if (autoLoopTimerRef.current) {
+      clearInterval(autoLoopTimerRef.current);
+    }
+
     const prevIndex =
       (currentMemberIndex - 1 + teamMembers.length) % teamMembers.length;
-    animateTransition(prevIndex);
+    animateTransition(prevIndex, 'previous');
+
+    // Restart auto-loop
+    autoLoopTimerRef.current = setInterval(() => {
+      if (isTransitioning) return;
+      const next = (currentIndexRef.current + 1) % teamMembers.length;
+      animateTransition(next, 'next');
+    }, 5000);
   };
 
-  const animateTransition = (newIndex: number) => {
-    if (memberInfoRef.current) {
-      gsap.to(memberInfoRef.current, {
+  const animateTransition = (newIndex: number, direction: 'next' | 'previous') => {
+    setIsTransitioning(true);
+
+    // Smooth, chill slide distances
+    const exitX = direction === 'next' ? -600 : 600;
+    const enterFromX = direction === 'next' ? 600 : -600;
+
+    // Create timeline for coordinated smooth animations
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setIsTransitioning(false);
+      }
+    });
+
+    // Smoothly animate face container out
+    if (faceContainerRef.current) {
+      tl.to(faceContainerRef.current, {
+        x: exitX,
         opacity: 0,
-        y: 20,
-        duration: 0.3,
-        onComplete: () => {
-          setCurrentMemberIndex(newIndex);
-          gsap.fromTo(
-            memberInfoRef.current,
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.3 }
-          );
-        },
-      });
-    } else {
-      setCurrentMemberIndex(newIndex);
+        duration: 1.2,
+        ease: "power1.inOut",
+      }, 0);
     }
-  };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!faceContainerRef.current) return;
+    // Smoothly animate member info out
+    if (memberInfoRef.current) {
+      tl.to(memberInfoRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: "power1.in",
+      }, 0);
+    }
 
-    const rect = faceContainerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const mouseX = e.clientX;
+    // Change the member index at midpoint
+    tl.call(() => {
+      setCurrentMemberIndex(newIndex);
+    }, [], 0.5);
 
-    setIsLeftSide(mouseX < centerX);
-    setMousePosition({ x: e.clientX, y: e.clientY });
-  };
+    // Smoothly animate face container in
+    if (faceContainerRef.current) {
+      tl.fromTo(faceContainerRef.current,
+        {
+          x: enterFromX,
+          opacity: 0,
+        },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power1.inOut",
+        }, 0.6);
+    }
 
-  const handleMouseLeave = () => {
-    setMousePosition(null);
-  };
-
-  const handleClick = () => {
-    if (isLeftSide) {
-      handlePrevious();
-    } else {
-      handleNext();
+    // Smoothly animate member info in
+    if (memberInfoRef.current) {
+      tl.fromTo(memberInfoRef.current,
+        {
+          opacity: 0,
+          y: -30,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power1.out",
+        }, 0.8);
     }
   };
 
   if (!isVisible) return null;
 
+  const memberNumber = String(currentMemberIndex + 1).padStart(2, "0");
+
   return (
     <>
-      {/* Blue cursor follower */}
-      <BlueCursor mousePosition={globalMousePosition} />
+      {/* Rest of the component stays the same... */}
+      <BlueCursor
+        mousePosition={globalMousePosition}
+        isInTeamSection={isVisible}
+        isLeftSide={isLeftSide}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+      />
 
-      {/* Matrix rain effect */}
+      <div
+        className="absolute inset-0 cursor-none z-5"
+        onClick={() => {
+          if (isLeftSide) {
+            handlePrevious();
+          } else {
+            handleNext();
+          }
+        }}
+      />
+
       <MatrixRain />
 
-      {/* TEAM text - top right */}
+      <div className="absolute top-24 sm:top-28 md:top-32 left-8 sm:left-12 md:left-16 lg:left-20 pointer-events-none z-20">
+        <div className="flex items-center gap-80 font-mono text-md md:text-base text-white">
+          <div className="flex items-center">
+            <span className="text-white opacity-70">[[</span>
+            <span className="mx-2 text-white font-bold">{memberNumber}</span>
+            <span className="text-white opacity-70">]]</span>
+          </div>
+
+          <div className="flex gap-3">
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+            <span className="text-white opacity-50">|</span>
+          </div>
+
+          <AnimatedMatrixCode />
+        </div>
+      </div>
+
       <div className="absolute top-24 sm:top-28 md:top-32 right-8 sm:right-12 md:right-16 lg:right-20 pointer-events-none z-20">
         <h2
           className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-medium text-white tracking-wider"
@@ -507,13 +729,9 @@ function TeamSection({ isVisible }: { isVisible: boolean }) {
         </h2>
       </div>
 
-      {/* 3D Face Model - NO BLACK BACKGROUND */}
       <div
         ref={faceContainerRef}
-        className="absolute top-1/2 left-[20%] -translate-y-1/2 w-[500px] h-[600px] cursor-none"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        onClick={handleClick}
+        className="absolute top-1/2 left-[20%] -translate-y-1/2 w-[500px] h-[600px] pointer-events-none z-10"
       >
         <Canvas
           camera={{ position: [0, 0, 4], fov: 50 }}
@@ -521,37 +739,24 @@ function TeamSection({ isVisible }: { isVisible: boolean }) {
           gl={{ alpha: true, antialias: true }}
           style={{ background: "transparent" }}
         >
-          {/* Enhanced lighting for lusion.co style */}
-          <ambientLight intensity={0.4} />
-
-          {/* Key light - blue tinted */}
+          <ambientLight intensity={0.3} color="#667788" />
           <directionalLight
             position={[5, 5, 5]}
-            intensity={1.5}
-            color="#5599ff"
+            intensity={1.8}
+            color="#88aacc"
           />
-
-          {/* Fill light - cyan */}
-          <pointLight position={[-3, 2, 4]} intensity={1.2} color="#44bbff" />
-
-          {/* Rim light - bright blue for edges */}
-          <pointLight position={[-5, 0, -3]} intensity={2} color="#66ccff" />
-
-          {/* Back light for depth */}
-          <pointLight position={[0, -3, -5]} intensity={1.5} color="#3388ff" />
-
-          {/* Top light - white for highlights */}
+          <pointLight position={[-3, 2, 4]} intensity={1.3} color="#6699bb" />
+          <pointLight position={[-5, 0, -3]} intensity={2.2} color="#99ccee" />
+          <pointLight position={[0, -3, -5]} intensity={1.4} color="#5577aa" />
           <spotLight
             position={[0, 8, 3]}
-            intensity={2.5}
+            intensity={2}
             angle={0.6}
             penumbra={0.8}
-            color="#ffffff"
+            color="#aabbcc"
             castShadow={false}
           />
-
-          {/* Bottom fill - subtle blue */}
-          <pointLight position={[0, -5, 2]} intensity={1} color="#2266cc" />
+          <pointLight position={[0, -5, 2]} intensity={0.9} color="#445566" />
 
           <Suspense fallback={null}>
             <FaceModel
@@ -562,10 +767,9 @@ function TeamSection({ isVisible }: { isVisible: boolean }) {
         </Canvas>
       </div>
 
-      {/* Person info - bottom left */}
       <div
         ref={memberInfoRef}
-        className="absolute left-8 sm:left-12 md:left-16 lg:left-20 bottom-24 sm:bottom-28 pointer-events-none z-20"
+        className="absolute left-8 sm:left-12 md:left-16 lg:left-20 bottom-16 sm:bottom-20 pointer-events-none z-20"
       >
         <div className="flex items-center gap-3 mb-3">
           {teamMembers.map((_, index) => (
@@ -580,30 +784,23 @@ function TeamSection({ isVisible }: { isVisible: boolean }) {
           ))}
         </div>
         <h3
-          className="text-3xl sm:text-4xl md:text-5xl font-medium text-white mb-2"
+          className="text-2xl sm:text-3xl md:text-4xl font-medium text-white mb-2"
           style={{ fontFamily: "Helvetica, Arial, sans-serif" }}
         >
           {currentMember.name}
         </h3>
-        <p className="text-sm sm:text-base text-gray-400 uppercase tracking-widest">
+        <p className="text-xs font-normal xs:text-base text-gray-400 uppercase tracking-widest">
           {currentMember.role}
         </p>
       </div>
 
-      {/* Description - bottom right */}
-      <div className="absolute right-8 sm:right-12 md:right-16 lg:right-20 bottom-16 sm:bottom-20 max-w-lg pointer-events-none z-20">
+      <div className="absolute right-8 sm:right-10 md:right-14 lg:right-18 bottom-12 sm:bottom-16 max-w-md pointer-events-none z-20">
         <p
           className="text-sm sm:text-base md:text-lg text-white leading-relaxed"
           style={{ fontFamily: "Helvetica, Arial, sans-serif" }}
         >
           {currentMember.description}
         </p>
-      </div>
-
-      <div className="absolute bottom-0 right-4 sm:right-6 md:right-8 lg:right-12 flex justify-end items-center pointer-events-none z-20">
-        <div className="text-white text-[24px] sm:text-3xl uppercase tracking-[0.1em] font-normal">
-          SCROLL TO EXPLORE
-        </div>
       </div>
     </>
   );
@@ -625,6 +822,22 @@ export default function ParticleHero() {
     let isScrolling = false;
 
     const handleWheel = (e: WheelEvent) => {
+      // If we're at section 3 (Team) and scrolling down, allow normal scroll
+      if (currentSection === 3 && e.deltaY > 0 && scrollCountRef.current >= maxScrollSteps) {
+        // Don't prevent default - allow page to scroll
+        return;
+      }
+
+      // If we're not in the component area, allow normal scroll
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      // If container is not in view, allow normal scroll
+      if (rect.bottom < 0 || rect.top > window.innerHeight) {
+        return;
+      }
+
       e.preventDefault();
 
       if (isScrolling) return;
@@ -768,21 +981,21 @@ export default function ParticleHero() {
 
     const container = containerRef.current;
     if (container) {
-      container.addEventListener("wheel", handleWheel, { passive: false });
+      // Listen on window for better scroll detection
+      window.addEventListener("wheel", handleWheel, { passive: false });
     }
 
     return () => {
-      if (container) {
-        container.removeEventListener("wheel", handleWheel);
-      }
+      window.removeEventListener("wheel", handleWheel);
     };
   }, [currentSection]);
 
   return (
-    <section
-      ref={containerRef}
-      className="fixed inset-0 w-full h-screen bg-black overflow-hidden"
-    >
+     <section
+    ref={containerRef}
+    className="h-screen w-full bg-black overflow-hidden relative"
+    style={{ height: '100vh' }}
+  >
       <div className="absolute inset-0">
         <Canvas
           camera={{
@@ -808,19 +1021,19 @@ export default function ParticleHero() {
       </div>
 
       {/* 5 Plus icons */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-[5%] text-white text-2xl sm:text-3xl font-light pointer-events-none z-20">
+      <div className="absolute top-1/2 -translate-y-1/2 left-[5%] text-gray-400 text-2xl sm:text-3xl font-light pointer-events-none z-20">
         +
       </div>
-      <div className="absolute top-1/2 -translate-y-1/2 left-[25%] text-white text-2xl sm:text-3xl font-light pointer-events-none z-20">
+      <div className="absolute top-1/2 -translate-y-1/2 left-[25%] text-gray-400 text-2xl sm:text-3xl font-light pointer-events-none z-20">
         +
       </div>
-      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-white text-2xl sm:text-3xl font-light pointer-events-none z-20">
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-gray-400 text-2xl sm:text-3xl font-light pointer-events-none z-20">
         +
       </div>
-      <div className="absolute top-1/2 -translate-y-1/2 right-[25%] text-white text-2xl sm:text-3xl font-light pointer-events-none z-20">
+      <div className="absolute top-1/2 -translate-y-1/2 right-[25%] text-gray-400 text-2xl sm:text-3xl font-light pointer-events-none z-20">
         +
       </div>
-      <div className="absolute top-1/2 -translate-y-1/2 right-[5%] text-white text-2xl sm:text-3xl font-light pointer-events-none z-20">
+      <div className="absolute top-1/2 -translate-y-1/2 right-[5%] text-gray-400 text-2xl sm:text-3xl font-light pointer-events-none z-20">
         +
       </div>
 
