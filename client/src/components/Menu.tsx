@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import gsap from 'gsap'
 
 interface MenuProps {
@@ -9,6 +10,7 @@ interface MenuProps {
 export default function Menu({ isOpen, onClose }: MenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const [shouldRender, setShouldRender] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
     if (isOpen) {
@@ -20,14 +22,12 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
     if (!menuRef.current) return
 
     if (isOpen && shouldRender) {
-      // Opening animation - slide up and fade in
       gsap.fromTo(
         menuRef.current,
         { opacity: 0, y: -20, scale: 0.95 },
         { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power2.out' }
       )
     } else if (!isOpen && shouldRender) {
-      // Closing animation - fall down and fade out
       gsap.to(menuRef.current, {
         opacity: 0,
         y: 20,
@@ -45,7 +45,6 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         const target = event.target as HTMLElement
-        // Don't close if clicking the MENU button
         if (!target.closest('button')) {
           onClose()
         }
@@ -61,7 +60,42 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
     }
   }, [isOpen, onClose])
 
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/'
+    }
+    return location.pathname.startsWith(path)
+  }
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const letters = e.currentTarget.querySelectorAll('.letter')
+    
+    gsap.fromTo(
+      letters,
+      {
+        rotateX: -90,
+        y: -20,
+        opacity: 0,
+      },
+      {
+        rotateX: 0,
+        y: 0,
+        opacity: 1,
+        duration: 0.5,
+        stagger: 0.05,
+        ease: 'back.out(1.5)',
+      }
+    )
+  }
+
   if (!shouldRender) return null
+
+  const menuItems = [
+    { label: 'HOME', path: '/' },
+    { label: 'ABOUT US', path: '/about' },
+    { label: 'PROJECTS', path: '/projects' },
+    { label: 'CONTACT', path: '/contact' },
+  ]
 
   return (
     <div
@@ -70,41 +104,55 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
       style={{ opacity: 0 }}
     >
       {/* Box 1 - Navigation Links */}
-      <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-6">
         <nav>
-          <ul className="space-y-12">
-            <li>
-              <a
-                href="#"
-                className="text-xl sm:text-2xl md:text-3xl font-normal text-black hover:opacity-60 transition-opacity tracking-tight flex items-center gap-2"
-              >
-                HOME
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-xl sm:text-2xl md:text-3xl font-normal text-black hover:opacity-60 transition-opacity tracking-tight block"
-              >
-                ABOUT US
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-xl sm:text-2xl md:text-3xl font-normal text-black hover:opacity-60 transition-opacity tracking-tight block"
-              >
-                PROJECTS
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-xl sm:text-2xl md:text-3xl font-normal text-black hover:opacity-60 transition-opacity tracking-tight block"
-              >
-                CONTACT
-              </a>
-            </li>
+          <ul className="space-y-3">
+            {menuItems.map((item) => (
+              <li key={item.path}>
+                <a
+                  href={item.path}
+                  onMouseEnter={!isActive(item.path) ? handleMouseEnter : undefined}
+                  className={`group relative text-xl sm:text-2xl md:text-3xl font-normal text-black transition-all tracking-tight flex items-center justify-between px-4 py-3 rounded-xl ${
+                    isActive(item.path) 
+                      ? '' 
+                      : 'hover:bg-gray-100'
+                  }`}
+                  style={{ perspective: '1000px' }}
+                >
+                  <span className="flex" style={{ transformStyle: 'preserve-3d' }}>
+                    {item.label.split('').map((char, index) => (
+                      <span
+                        key={index}
+                        className="letter inline-block"
+                        style={{ transformStyle: 'preserve-3d' }}
+                      >
+                        {char === ' ' ? '\u00A0' : char}
+                      </span>
+                    ))}
+                  </span>
+                  
+                  {/* Active dot indicator */}
+                  {isActive(item.path) && (
+                    <span className="w-2 h-2 bg-black rounded-full" />
+                  )}
+                  
+                  {/* Hover arrow */}
+                  {!isActive(item.path) && (
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M5 12H19M19 12L12 5M19 12L12 19"
+                          stroke="black"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  )}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>

@@ -1,12 +1,14 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import Hero from './components/Hero'
 import AboutSection from './components/AboutSection'
 import ReelSection from './components/ReelSection'
 import FeaturedWork from './components/FeaturedWork'
 import ConnectingSection from './components/ConnectingSection'
 import AstronautFullscreen from './pages/AstronautFullscreen'
+import AboutUs from './pages/AboutUs'
 import LiquidDistortion from './components/LiquidDistortion'
+import PageLoader from './components/PageLoader'
 
 import './index.css'
 
@@ -22,31 +24,49 @@ function HomePage() {
   )
 }
 
-function App() {
-  return (
-    <BrowserRouter>
+function AppContent() {
+  const location = useLocation()
+  const [isLoading, setIsLoading] = useState(false)
+  const [showContent, setShowContent] = useState(true)
 
-    {/* Liquid distortion effect */}
+  useEffect(() => {
+    // Show loader on route change
+    setIsLoading(true)
+    setShowContent(false)
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
+  const handleLoaderComplete = () => {
+    setIsLoading(false)
+    setShowContent(true)
+  }
+
+  return (
+    <>
+      {/* Liquid distortion effect */}
       <LiquidDistortion />
 
-      
-      <PageTransition>
+      {/* Page loader */}
+      {isLoading && <PageLoader onComplete={handleLoaderComplete} />}
+
+      {/* Content */}
+      {showContent && (
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route path="/astronaut" element={<AstronautFullscreen />} />
         </Routes>
-      </PageTransition>
-    </BrowserRouter>
+      )}
+    </>
   )
 }
 
-// Page transition wrapper
-function PageTransition({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
-  return <div className="page-transition">{children}</div>
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  )
 }
 
 export default App
