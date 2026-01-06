@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import ParticleHero from '../components/ParticleHero'
 import Header from '../components/Header'
 import ClientsSection from '../components/ClientsSection'

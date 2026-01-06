@@ -509,7 +509,7 @@ function TeamSection({ isVisible }: { isVisible: boolean }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const faceContainerRef = useRef<HTMLDivElement>(null);
   const memberInfoRef = useRef<HTMLDivElement>(null);
-  const autoLoopTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoLoopTimerRef = useRef<number | null>(null);
   const currentIndexRef = useRef(currentMemberIndex); // Keep track of current index
 
   const currentMember = teamMembers[currentMemberIndex];

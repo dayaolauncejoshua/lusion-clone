@@ -58,7 +58,7 @@ export default function PageLoader({ onComplete }: PageLoaderProps) {
         {"LOADING".split('').map((char, i) => (
           <span
             key={i}
-            ref={(el) => (letterRefs.current[i] = el)}
+            ref={(el) => { letterRefs.current[i] = el }}
             className="inline-block"
             style={{ transformStyle: 'preserve-3d' }}
           >
