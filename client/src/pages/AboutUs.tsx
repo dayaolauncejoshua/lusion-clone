@@ -1,22 +1,26 @@
+import { useState } from 'react'
 import ParticleHero from '../components/ParticleHero'
-import Header from '../components/Header'
 import ClientsSection from '../components/ClientsSection'
+import AwardsSection from '../components/AwardsSection'
+import CapabilitySection from '../components/CapabilitySection'
+import CTASection from '../components/CTASection'
+import Header from '../components/Header'
 
 export default function AboutUs() {
+  const [showFooter, setShowFooter] = useState(false)
+
   return (
-    <div className="bg-black">
-      {/* Fixed Header */}
+    <div className="relative">
+      {/* Single Header at page level */}
       <div className="fixed top-0 left-0 right-0 z-[200]">
-        <Header darkMode={true} />
+        <Header darkMode={!showFooter} />
       </div>
 
-      {/* Fixed Particle Hero Section with scroll transitions */}
       <ParticleHero />
-
-       {/* Normal scrollable content starts here */}
-      <div className="relative z-30">
-        <ClientsSection />
-      </div>
+      <ClientsSection />
+      <AwardsSection />
+      <CapabilitySection />
+      <CTASection onFooterChange={setShowFooter} />
     </div>
   )
 }

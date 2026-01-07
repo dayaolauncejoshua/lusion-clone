@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Helvetica', 'Arial', 'FreeSans', 'Garuda', 'sans-serif'],
+        sans: ['Bebas Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        display: ['Bebas Neue', 'Helvetica', 'Arial', 'sans-serif'],
       },
     },
   },
