@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Header from "../components/Header";
@@ -10,8 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [, setScrollProgress] = useState(0);
   const [showNext, setShowNext] = useState(false);
   const [metaOpacity, setMetaOpacity] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);

@@ -8,12 +8,12 @@ import ProjectsCTASection from '../components/ProjectsCTASection'
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Projects() {
-  const [showFooter, setShowFooter] = useState(false);
+  const [, setShowFooter] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const counterRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const projects = [
     {
