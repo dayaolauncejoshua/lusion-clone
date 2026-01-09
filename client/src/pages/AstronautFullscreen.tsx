@@ -4,7 +4,7 @@ import type { Astronaut3DRef } from "../components/Astronaut3D";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import gsap from "gsap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function AstronautFullscreen() {
   const [stage, setStage] = useState(0);
@@ -22,6 +22,46 @@ export default function AstronautFullscreen() {
   const scrollCountRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const hasTriggeredContact = useRef(false);
+
+   // Handle contact navigation from HomePage - FIRST useEffect
+  useEffect(() => {
+    const state = location.state as { showContact?: boolean } | null;
+    
+    if (state?.showContact && !hasTriggeredContact.current) {
+      hasTriggeredContact.current = true;
+      
+      // Clear the state
+      navigate(location.pathname, { replace: true, state: {} });
+      
+      // Immediately set to stage 3
+      setStage(3);
+      setTunnelProgress(0);
+      setShowFinalUI(true);
+      scrollCountRef.current = 2;
+    }
+  }, [location.state, location.pathname, navigate]);
+
+  // Watch for showFinalUI to become true, then show footer
+  useEffect(() => {
+    if (showFinalUI && hasTriggeredContact.current && !showFooter) {
+      // Wait for final UI to render
+      const timer = setTimeout(() => {
+        setShowFooter(true);
+        gsap.to({}, {
+          duration: 1.5,
+          ease: "power2.inOut",
+          onUpdate: function () {
+            setFooterProgress(this.progress());
+          },
+        });
+      }, 800); // Give more time for UI to render
+
+      return () => clearTimeout(timer);
+    }
+  }, [showFinalUI, showFooter]);
+  
 
   useEffect(() => {
     if (stage === 1 && textRef.current) {
@@ -351,6 +391,47 @@ export default function AstronautFullscreen() {
 
     return () => clearInterval(intervalId);
   }, [showFinalUI]);
+
+// showFooter event listener
+  useEffect(() => {
+    const handleShowFooter = () => {
+      // If not at stage 3 yet, fast-forward to stage 3 first
+      if (stage < 3) {
+        setStage(3);
+        setTunnelProgress(0);
+        setShowFinalUI(true);
+        scrollCountRef.current = 2;
+
+        setTimeout(() => {
+          setShowFooter(true);
+          gsap.to({}, {
+            duration: 1.5,
+            ease: "power2.inOut",
+            onUpdate: function () {
+              setFooterProgress(this.progress());
+            },
+          });
+        }, 800);
+      } else {
+        if (!showFooter) {
+          setShowFooter(true);
+          gsap.to({}, {
+            duration: 1.5,
+            ease: "power2.inOut",
+            onUpdate: function () {
+              setFooterProgress(this.progress());
+            },
+          });
+        }
+      }
+    };
+
+    window.addEventListener('showFooter', handleShowFooter);
+    
+    return () => {
+      window.removeEventListener('showFooter', handleShowFooter);
+    };
+  }, [stage, showFooter]);
 
   return (
     <div

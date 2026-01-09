@@ -9,18 +9,16 @@ interface Particle {
   vx: number;
   vy: number;
   size: number;
-  type: "circle" | "cross" | "dot";
+  type: "circle" | "triangle" | "square" | "pentagon" | "hexagon" | "ring";
   rotation: number;
-  settled: boolean;
-  settledX?: number;
-  settledY?: number;
+  color: string;
 }
 
-interface CTASectionProps {
+interface ProjectsCTASectionProps {
   onFooterChange?: (showFooter: boolean) => void;
 }
 
-export default function CTASection({ onFooterChange }: CTASectionProps) {
+export default function ProjectsCTASection({ onFooterChange }: ProjectsCTASectionProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: -1000, y: -1000 });
@@ -43,21 +41,18 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
     }
   }, [showFooter, onFooterChange]);
 
-  // Update the wheel event handler
+  // Wheel event handler for footer
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // Check if CTA section is in viewport and user is scrolled to it
       if (sectionRef.current) {
         const rect = sectionRef.current.getBoundingClientRect();
         const isInViewport = rect.top <= 100 && rect.bottom >= window.innerHeight - 100;
         
-        // Only handle footer if we're at the CTA section
         if (!isInViewport && !showFooter) {
-          return; // Don't handle scroll if not at CTA section
+          return;
         }
       }
 
-      // If footer is fully visible, allow normal scrolling within footer
       if (showFooter && footerProgress === 1) {
         const footerElement = document.querySelector("footer");
         if (footerElement && e.deltaY < 0) {
@@ -81,13 +76,11 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
         return;
       }
 
-      // Prevent default for footer animation
       if (showFooter && footerProgress < 1 && footerProgress > 0) {
         e.preventDefault();
         return;
       }
 
-      // SCROLL DOWN - Show footer (only if at CTA section)
       if (e.deltaY > 0 && !showFooter) {
         e.preventDefault();
         setShowFooter(true);
@@ -99,9 +92,7 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
             setFooterProgress(this.progress());
           },
         });
-      }
-      // SCROLL UP - Hide footer (if animating)
-      else if (e.deltaY < 0 && showFooter && footerProgress < 1 && footerProgress > 0) {
+      } else if (e.deltaY < 0 && showFooter && footerProgress < 1 && footerProgress > 0) {
         e.preventDefault();
         gsap.to({}, {
           duration: 1.5,
@@ -136,36 +127,116 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
     window.addEventListener("resize", resize);
 
     const particles: Particle[] = [];
-    const particleCount = 1500;
+    const particleCount = 300; // Fewer particles
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: -Math.random() * 1500 - 100,
-        vx: (Math.random() - 0.5) * 2,
-        vy: Math.random() * 2,
-        size: Math.random() * 4 + 3,
-        type:
-          Math.random() > 0.7
-            ? "cross"
-            : Math.random() > 0.4
-            ? "circle"
-            : "dot",
-        rotation: Math.random() * Math.PI * 2,
-        settled: false,
-      });
-    }
+   const colors = [
+  "#000000", // black
+  "#000000", // black (duplicate for more weight)
+  "#000000", // black (duplicate for more weight)
+  "#1a1a1a", // very dark gray
+  "#1a1a1a", // very dark gray (duplicate)
+  "#333333", // dark gray
+  "#333333", // dark gray (duplicate)
+  "#4d4d4d", // medium dark gray
+  "#666666", // medium gray
+  "#808080", // gray
+  "#999999", // light gray
+  "#FF0000", // red
+  "#0000FF", // blue
+  "#FFFF00", // yellow
+  "#C724B1", // purple
+];
+
+    const types: Particle["type"][] = ["circle", "triangle", "square", "pentagon", "hexagon", "ring"];
+
+for (let i = 0; i < particleCount; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: -Math.random() * 1500 - 100,
+    vx: (Math.random() - 0.5) * 2,
+    vy: Math.random() * 2,
+    size: Math.random() * 15 + 10, // Bigger particles (10-25px)
+    type: types[Math.floor(Math.random() * types.length)],
+    rotation: Math.random() * Math.PI * 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+  });
+}
 
     particlesRef.current = particles;
 
     const GRAVITY = 0.15;
     const DAMPING = 0.92;
-    const MIN_DISTANCE = 30;
+    const MIN_DISTANCE = 40; // More spacing
     const MOUSE_FORCE = 500;
     const MOUSE_RADIUS = 280;
     const PILE_HEIGHT = canvas.height * (2 / 3);
 
     let time = 0;
+
+    const drawShape = (ctx: CanvasRenderingContext2D, particle: Particle) => {
+      ctx.save();
+      ctx.translate(particle.x, particle.y);
+      ctx.rotate(particle.rotation);
+      ctx.fillStyle = particle.color;
+      ctx.strokeStyle = particle.color;
+      ctx.lineWidth = 3;
+
+      switch (particle.type) {
+        case "circle":
+          ctx.beginPath();
+          ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+
+        case "triangle":
+          ctx.beginPath();
+          ctx.moveTo(0, -particle.size);
+          ctx.lineTo(particle.size * 0.866, particle.size * 0.5);
+          ctx.lineTo(-particle.size * 0.866, particle.size * 0.5);
+          ctx.closePath();
+          ctx.fill();
+          break;
+
+        case "square":
+          ctx.fillRect(-particle.size, -particle.size, particle.size * 2, particle.size * 2);
+          break;
+
+        case "pentagon":
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+            const x = particle.size * Math.cos(angle);
+            const y = particle.size * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          break;
+
+        case "hexagon":
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = (i * 2 * Math.PI) / 6;
+            const x = particle.size * Math.cos(angle);
+            const y = particle.size * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          break;
+
+        case "ring":
+          ctx.beginPath();
+          ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
+          ctx.arc(0, 0, particle.size * 0.6, 0, Math.PI * 2, true);
+          ctx.fill();
+          break;
+      }
+
+      ctx.restore();
+    };
 
     const animate = () => {
       const ctx = canvas.getContext("2d");
@@ -180,8 +251,7 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance < MOUSE_RADIUS && distance > 0) {
-          const force =
-            ((MOUSE_RADIUS - distance) / MOUSE_RADIUS) * MOUSE_FORCE;
+          const force = ((MOUSE_RADIUS - distance) / MOUSE_RADIUS) * MOUSE_FORCE;
           const angle = Math.atan2(dy, dx);
           particle.vx -= Math.cos(angle) * force * 0.2;
           particle.vy -= Math.sin(angle) * force * 0.2;
@@ -242,35 +312,9 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
           particle.vx *= -0.2;
         }
 
-        if (particle.type === "cross") {
-          particle.rotation += 0.01;
-        }
+        particle.rotation += 0.02;
 
-        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.lineWidth = 2;
-
-        if (particle.type === "circle") {
-          ctx.beginPath();
-          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (particle.type === "dot") {
-          ctx.beginPath();
-          ctx.arc(particle.x, particle.y, particle.size * 0.6, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          ctx.save();
-          ctx.translate(particle.x, particle.y);
-          ctx.rotate(particle.rotation);
-          const size = particle.size * 1.8;
-          ctx.beginPath();
-          ctx.moveTo(-size, 0);
-          ctx.lineTo(size, 0);
-          ctx.moveTo(0, -size);
-          ctx.lineTo(0, size);
-          ctx.stroke();
-          ctx.restore();
-        }
+        drawShape(ctx, particle);
       });
 
       requestAnimationFrame(animate);
@@ -408,8 +452,7 @@ export default function CTASection({ onFooterChange }: CTASectionProps) {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Add this useEffect after the existing useEffects
-useEffect(() => {
+  useEffect(() => {
   const handleShowFooter = () => {
     if (!showFooter) {
       setShowFooter(true);
@@ -432,34 +475,34 @@ useEffect(() => {
 
   return (
     <>
-      <section ref={sectionRef} className="relative min-h-screen bg-[#1a2ffb] overflow-hidden flex flex-col items-center justify-center">
+      <section ref={sectionRef} className="relative min-h-screen bg-[#e8e8ed] overflow-hidden flex flex-col items-center justify-center py-32">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
         <div
-          className="relative z-10 flex flex-col items-center justify-center"
-          style={{ width: "1400px", height: "700px" }}
+          className="relative z-10 flex flex-col items-center justify-center px-32"
+          style={{ width: "1600px", height: "800px" }}
         >
-          <div className="absolute top-0 left-0 text-white text-5xl font-thin">
+          <div className="absolute top-0 left-0 text-black text-5xl font-thin">
             +
           </div>
-          <div className="absolute top-0 right-0 text-white text-5xl font-light">
+          <div className="absolute top-0 right-0 text-black text-5xl font-light">
             +
           </div>
-          <div className="absolute bottom-0 left-0 text-white text-5xl font-light">
+          <div className="absolute bottom-0 left-0 text-black text-5xl font-light">
             +
           </div>
-          <div className="absolute bottom-0 right-0 text-white text-5xl font-light">
+          <div className="absolute bottom-0 right-0 text-black text-5xl font-light">
             +
           </div>
 
-          <div className="absolute top-0 text-white text-md tracking-[0.1em] uppercase font-medium mt-3 justify-center">
+          <div className="absolute top-0 text-black text-md tracking-[0.1em] uppercase font-medium mt-3 justify-center">
             IS YOUR BIG IDEA READY TO GO WILD?
           </div>
 
           <div className="flex flex-col items-center justify-center w-full h-full">
             <div className="px-8">
               <h2
-                className="text-[10rem] font-light text-white text-center leading-[1.1] tracking-tight cursor-pointer group"
+                className="text-[10rem] font-light text-black text-center leading-[1.1] tracking-tight cursor-pointer group"
                 style={{
                   perspective: "2000px",
                   transformStyle: "preserve-3d",
@@ -491,7 +534,7 @@ useEffect(() => {
                     </span>
                   ))}
                   <span
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-white origin-left transition-transform duration-300"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-black origin-left transition-transform duration-300"
                     style={{
                       transform: isTextHovered ? "scaleX(1)" : "scaleX(0)",
                     }}
@@ -525,7 +568,7 @@ useEffect(() => {
                     );
                   })}
                   <span
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-white origin-left transition-transform duration-300"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-black origin-left transition-transform duration-300"
                     style={{
                       transform: isTextHovered ? "scaleX(1)" : "scaleX(0)",
                     }}
@@ -538,7 +581,7 @@ useEffect(() => {
 
         <button
           onClick={() => navigate("/")}
-          className="absolute bottom-12 z-10 px-10 py-4 bg-white text-black rounded-full font-medium text-xs tracking-[0.2em] uppercase hover:bg-gray-100 transition-colors duration-300 flex items-center gap-4 group"
+          className="absolute bottom-12 z-10 px-10 py-4 bg-black text-white rounded-full font-medium text-xs tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors duration-300 flex items-center gap-4 group"
           style={{ perspective: "2000px" }}
         >
           <svg

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -11,6 +12,7 @@ export default function AboutSection() {
   const contentRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const navigate = useNavigate()
 
   const videos = [
     'https://www.pexels.com/download/video/19836663/',
@@ -145,7 +147,8 @@ export default function AboutSection() {
             <div className="flex-1 flex justify-start lg:justify-start items-start lg:items-end lg:pb-8 lg:pt-10 lg:pl-16">
               <button
                 ref={buttonRef}
-                className="group relative flex items-center gap-2 sm:gap-3 px-5 sm:px-6 md:px-7 lg:px-8 py-3 sm:py-3.5 md:py-4 bg-white text-black rounded-full text-sm sm:text-base md:text-lg font-medium hover:bg-[#0044ff] hover:text-white transition-all duration-300 shadow-lg border border-gray-200 overflow-hidden"
+                onClick={() => navigate('/about')}
+                className="group relative flex items-center gap-2 sm:gap-3 px-5 sm:px-6 md:px-7 lg:px-8 py-3 sm:py-3.5 md:py-4 bg-white text-black rounded-full text-sm sm:text-base md:text-lg font-medium hover:bg-[#0044ff] hover:text-white transition-all duration-300 shadow-lg border border-gray-200 overflow-hidden cursor-pointer"
               >
                 <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-black rounded-full group-hover:opacity-0 group-hover:scale-0 transition-all duration-300" />
                 <span className="group-hover:-translate-x-6 sm:group-hover:-translate-x-7 md:group-hover:-translate-x-8 transition-transform duration-300">

@@ -1,75 +1,91 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import gsap from 'gsap'
+import { useEffect, useRef, useState } from "react";
+import { useLocation} from "react-router-dom";
+import gsap from "gsap";
 
 interface MenuProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export default function Menu({ isOpen, onClose }: MenuProps) {
-  const menuRef = useRef<HTMLDivElement>(null)
-  const [shouldRender, setShouldRender] = useState(false)
-  const location = useLocation()
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [shouldRender, setShouldRender] = useState(false);
+  const location = useLocation();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
-      setShouldRender(true)
+      setShouldRender(true);
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   useEffect(() => {
-    if (!menuRef.current) return
+    if (!menuRef.current) return;
 
     if (isOpen && shouldRender) {
       gsap.fromTo(
         menuRef.current,
         { opacity: 0, y: -20, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power2.out' }
-      )
+        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power2.out" }
+      );
     } else if (!isOpen && shouldRender) {
       gsap.to(menuRef.current, {
         opacity: 0,
         y: 20,
         scale: 0.95,
         duration: 0.3,
-        ease: 'power2.in',
+        ease: "power2.in",
         onComplete: () => {
-          setShouldRender(false)
-        }
-      })
+          setShouldRender(false);
+        },
+      });
     }
-  }, [isOpen, shouldRender])
+  }, [isOpen, shouldRender]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        const target = event.target as HTMLElement
-        if (!target.closest('button')) {
-          onClose()
+        const target = event.target as HTMLElement;
+        if (!target.closest("button")) {
+          onClose();
         }
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  const handleContactClick = () => {
+    // Always dispatch event to show footer on current page
+    window.dispatchEvent(new CustomEvent("showFooter"));
+    onClose();
+  };
+
+  const handleNavClick = (path: string, e: React.MouseEvent) => {
+    if (path === "/contact") {
+      e.preventDefault();
+      handleContactClick();
+    } else {
+      onClose();
     }
-  }, [isOpen, onClose])
+  };
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/'
+    if (path === "/") {
+      return location.pathname === "/";
     }
-    return location.pathname.startsWith(path)
-  }
+    return location.pathname.startsWith(path);
+  };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const letters = e.currentTarget.querySelectorAll('.letter')
-    
+    const letters = e.currentTarget.querySelectorAll(".letter");
+
     gsap.fromTo(
       letters,
       {
@@ -83,19 +99,19 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
         opacity: 1,
         duration: 0.5,
         stagger: 0.05,
-        ease: 'back.out(1.5)',
+        ease: "back.out(1.5)",
       }
-    )
-  }
+    );
+  };
 
-  if (!shouldRender) return null
+  if (!shouldRender) return null;
 
   const menuItems = [
-    { label: 'HOME', path: '/' },
-    { label: 'ABOUT US', path: '/about' },
-    { label: 'PROJECTS', path: '/projects' },
-    { label: 'CONTACT', path: '/contact' },
-  ]
+    { label: "HOME", path: "/" },
+    { label: "ABOUT US", path: "/about" },
+    { label: "PROJECTS", path: "/projects" },
+    { label: "CONTACT", path: "/contact" },
+  ];
 
   return (
     <div
@@ -111,35 +127,44 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
               <li key={item.path}>
                 <a
                   href={item.path}
-                  onMouseEnter={!isActive(item.path) ? handleMouseEnter : undefined}
+                  onClick={(e) => handleNavClick(item.path, e)}
+                  onMouseEnter={
+                    !isActive(item.path) ? handleMouseEnter : undefined
+                  }
                   className={`group relative text-xl sm:text-2xl md:text-3xl font-normal text-black transition-all tracking-tight flex items-center justify-between px-4 py-3 rounded-xl ${
-                    isActive(item.path) 
-                      ? '' 
-                      : 'hover:bg-gray-100'
+                    isActive(item.path) ? "" : "hover:bg-gray-100"
                   }`}
-                  style={{ perspective: '1000px' }}
+                  style={{ perspective: "1000px" }}
                 >
-                  <span className="flex" style={{ transformStyle: 'preserve-3d' }}>
-                    {item.label.split('').map((char, index) => (
+                  <span
+                    className="flex"
+                    style={{ transformStyle: "preserve-3d" }}
+                  >
+                    {item.label.split("").map((char, index) => (
                       <span
                         key={index}
                         className="letter inline-block"
-                        style={{ transformStyle: 'preserve-3d' }}
+                        style={{ transformStyle: "preserve-3d" }}
                       >
-                        {char === ' ' ? '\u00A0' : char}
+                        {char === " " ? "\u00A0" : char}
                       </span>
                     ))}
                   </span>
-                  
+
                   {/* Active dot indicator */}
                   {isActive(item.path) && (
                     <span className="w-2 h-2 bg-black rounded-full" />
                   )}
-                  
+
                   {/* Hover arrow */}
                   {!isActive(item.path) && (
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
                         <path
                           d="M5 12H19M19 12L12 5M19 12L12 19"
                           stroke="black"
@@ -160,7 +185,9 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
       {/* Box 2 - Newsletter */}
       <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
         <h3 className="text-2xl sm:text-4xl md:text-5xl font-normal text-black mb-4 leading-tight tracking-tight pb-5">
-          Subscribe to<br />our newsletter
+          Subscribe to
+          <br />
+          our newsletter
         </h3>
         <div className="relative">
           <input
@@ -192,7 +219,9 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
         >
           <div className="flex items-center gap-2">
             <span className="text-5xl">ö</span>
-            <span className="text-lg sm:text-3xl font-medium tracking-wider pl-4">LABS</span>
+            <span className="text-lg sm:text-3xl font-medium tracking-wider pl-4">
+              LABS
+            </span>
           </div>
           <svg
             width="36"
@@ -212,5 +241,5 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
         </a>
       </div>
     </div>
-  )
+  );
 }
