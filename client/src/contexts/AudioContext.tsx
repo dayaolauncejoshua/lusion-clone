@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useRef } from 'react';
+import type { ReactNode } from 'react';
 
 interface AudioContextType {
   isPlaying: boolean;
