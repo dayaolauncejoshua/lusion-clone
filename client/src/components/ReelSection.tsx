@@ -13,35 +13,33 @@ export default function ReelSection() {
   const shape1Ref = useRef<HTMLDivElement>(null);
   const shape2Ref = useRef<HTMLDivElement>(null);
   const shape3Ref = useRef<HTMLDivElement>(null);
-  const reelVideoRef = useRef<HTMLVideoElement>(null)
+  const reelVideoRef = useRef<HTMLVideoElement>(null);
 
-    const [isPlayButtonHovered, setIsPlayButtonHovered] = useState(false)
+  const [isPlayButtonHovered, setIsPlayButtonHovered] = useState(false);
 
-  // Array of video sources - fun, playful videos with people
+  // Array of video sources
   const reelVideos = [
-    'https://www.pexels.com/download/video/19836663/', // People celebrating/dancing
-    'https://www.pexels.com/download/video/35087112/', // Business people meeting/talking
-    'https://www.pexels.com/download/video/35131909/', // Team working together
-    'https://www.pexels.com/download/video/3188958/', // People in office/creative space
-    'https://www.pexels.com/download/video/10254613/', // Group collaboration/meeting
-  ]
+    "https://www.pexels.com/download/video/19836663/",
+    "https://www.pexels.com/download/video/35087112/",
+    "https://www.pexels.com/download/video/35131909/",
+    "https://www.pexels.com/download/video/3188958/",
+    "https://www.pexels.com/download/video/10254613/",
+  ];
 
-   const [currentReelVideoIndex, setCurrentReelVideoIndex] = useState(0)
-  const [reelVideoOpacity, setReelVideoOpacity] = useState(1)
+  const [currentReelVideoIndex, setCurrentReelVideoIndex] = useState(0);
+  const [reelVideoOpacity, setReelVideoOpacity] = useState(1);
 
   const handleReelVideoEnd = () => {
-    // Fade out
-    setReelVideoOpacity(0)
-    
-    // After fade out, change video
+    setReelVideoOpacity(0);
     setTimeout(() => {
-      setCurrentReelVideoIndex((prevIndex) => (prevIndex + 1) % reelVideos.length)
-      // Fade in new video
+      setCurrentReelVideoIndex(
+        (prevIndex) => (prevIndex + 1) % reelVideos.length
+      );
       setTimeout(() => {
-        setReelVideoOpacity(1)
-      }, 50)
-    }, 500)
-  }
+        setReelVideoOpacity(1);
+      }, 50);
+    }, 500);
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -199,7 +197,7 @@ export default function ReelSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen bg-[#f5f5f5] flex justify-center py-20 px-16"
+      className="relative min-h-screen bg-[#f5f5f5] flex justify-center py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-10 lg:px-16"
     >
       <style>
         {`
@@ -231,20 +229,20 @@ export default function ReelSection() {
         `}
       </style>
 
-      {/* Decorative Blue Organic Shapes */}
+      {/* Decorative Blue Organic Shapes - Responsive */}
       <div
         ref={shape1Ref}
-        className="absolute top-10 left-20 w-[600px] h-[300px] bg-[#0044ff] opacity-20 rounded-full blur-3xl"
+        className="absolute top-5 sm:top-10 left-5 sm:left-10 md:left-20 w-[300px] sm:w-[400px] md:w-[500px] lg:w-[600px] h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] bg-[#0044ff] opacity-20 rounded-full blur-3xl"
         style={{ transform: "rotate(-25deg)" }}
       />
       <div
         ref={shape2Ref}
-        className="absolute top-1/3 -right-32 w-[500px] h-[500px] bg-[#0044ff] opacity-15 rounded-full blur-3xl"
+        className="absolute top-1/3 -right-16 sm:-right-20 md:-right-32 w-[250px] sm:w-[350px] md:w-[450px] lg:w-[500px] h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] bg-[#0044ff] opacity-15 rounded-full blur-3xl"
         style={{ transform: "rotate(15deg)" }}
       />
       <div
         ref={shape3Ref}
-        className="absolute -bottom-20 left-1/4 w-[800px] h-[400px] bg-[#0044ff] opacity-25"
+        className="absolute -bottom-10 sm:-bottom-20 left-1/4 w-[400px] sm:w-[600px] md:w-[700px] lg:w-[800px] h-[200px] sm:h-[300px] md:h-[350px] lg:h-[400px] bg-[#0044ff] opacity-25"
         style={{
           clipPath: "ellipse(50% 100% at 50% 100%)",
           filter: "blur(60px)",
@@ -252,135 +250,86 @@ export default function ReelSection() {
       />
 
       {/* Container wrapper */}
-      <div className="relative w-full max-w-[1600px] ">
-        {/* Top row - Plus icons (default state) */}
+      <div className="relative w-full max-w-[1600px]">
+        {/* Top row - Plus icons (default state) - Responsive */}
         <div
-          className="absolute -top-10 left-0 text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -top-6 sm:-top-8 md:-top-10 left-0 text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -top-10 left-[25%] text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -top-6 sm:-top-8 md:-top-10 left-[25%] text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -top-10 left-[50%] -translate-x-1/2 text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -top-6 sm:-top-8 md:-top-10 left-[50%] -translate-x-1/2 text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -top-10 right-[25%] text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -top-6 sm:-top-8 md:-top-10 right-[25%] text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -top-10 right-0 text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -top-6 sm:-top-8 md:-top-10 right-0 text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
 
-        {/* Marquee - Top row (scrolls LEFT) */}
-        <div 
-          className="absolute -top-10 left-0 right-0 overflow-hidden transition-opacity duration-300 whitespace-nowrap"
+        {/* Marquee - Top row (scrolls LEFT) - Responsive */}
+        <div
+          className="absolute -top-6 sm:-top-8 md:-top-10 left-0 right-0 overflow-hidden transition-opacity duration-300 whitespace-nowrap"
           style={{ opacity: isPlayButtonHovered ? 1 : 0 }}
         >
           <div className="marquee-left inline-flex">
-            <div className="flex items-center gap-60">
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
+            <div className="flex items-center gap-20 sm:gap-40 md:gap-60">
+              {[...Array(7)].map((_, i) => (
+                <span
+                  key={i}
+                  className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg lg:text-xl font-medium text-black"
+                >
+                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl">
+                    ▶▶▶
+                  </span>
+                  <span className="tracking-wider">PLAY REEL</span>
+                </span>
+              ))}asda
             </div>
-            {/* Duplicate for seamless loop
-            <div className="flex items-center gap-32">
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-            </div> */}
           </div>
         </div>
 
-        {/* Video Container */}
+        {/* Video Container - Responsive */}
         <div
           ref={videoContainerRef}
-          className="relative overflow-hidden shadow-2xl"
+          className="relative overflow-hidden shadow-2xl h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[75vh] rounded-2xl sm:rounded-3xl md:rounded-[2rem]"
           style={{
             width: "100%",
-            height: "75vh",
             maxHeight: "800px",
-            borderRadius: "2rem",
             background: "linear-gradient(135deg, #5B8DEF 0%, #0F6FFF 100%)",
           }}
         >
           {/* Video */}
-           <video
+          <video
             ref={reelVideoRef}
             autoPlay
             muted
             playsInline
             className="w-full h-full object-cover"
-            style={{ 
+            style={{
               opacity: reelVideoOpacity,
-              transition: 'opacity 0.5s ease-in-out'
+              transition: "opacity 0.5s ease-in-out",
             }}
             onEnded={handleReelVideoEnd}
             key={currentReelVideoIndex}
           >
-            <source
-              src={reelVideos[currentReelVideoIndex]}
-              type="video/mp4"
-            />
+            <source src={reelVideos[currentReelVideoIndex]} type="video/mp4" />
           </video>
 
           {/* Blue overlay */}
@@ -392,17 +341,17 @@ export default function ReelSection() {
             }}
           />
 
-          {/* PLAY REEL Overlay */}
+          {/* PLAY REEL Overlay - Responsive */}
           <div
             ref={playTextRef}
             className="absolute inset-0 flex items-center justify-center z-10"
             style={{ perspective: "1000px" }}
           >
-            <div className="flex items-center justify-center gap-12">
-              {/* PLAY Text */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 px-4">
+              {/* PLAY Text - Responsive */}
               <h2
                 ref={playLettersRef}
-                className="text-white text-[10rem] font-bold tracking-[0.02em] leading-none flex"
+                className="text-white text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10rem] font-bold tracking-[0.02em] leading-none flex"
                 style={{
                   textShadow: "0 4px 20px rgba(0,0,0,0.3)",
                 }}
@@ -433,9 +382,9 @@ export default function ReelSection() {
                 </span>
               </h2>
 
-              {/* Play Button */}
+              {/* Play Button - Responsive */}
               <button
-                className="group w-28 h-28 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-2xl"
+                className="group w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-2xl flex-shrink-0"
                 style={{
                   backgroundColor: isPlayButtonHovered ? "#0044ff" : "white",
                   transition: "background-color 0.3s ease",
@@ -444,7 +393,7 @@ export default function ReelSection() {
                 onMouseLeave={() => setIsPlayButtonHovered(false)}
               >
                 <svg
-                  className="w-12 h-12 ml-1 transition-colors duration-300"
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-12 lg:h-12 ml-1 transition-colors duration-300"
                   style={{
                     color: isPlayButtonHovered ? "white" : "black",
                   }}
@@ -455,10 +404,10 @@ export default function ReelSection() {
                 </svg>
               </button>
 
-              {/* REEL Text */}
+              {/* REEL Text - Responsive */}
               <h2
                 ref={reelLettersRef}
-                className="text-white text-[10rem] font-bold tracking-[0.02em] leading-none flex"
+                className="text-white text-[4rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] xl:text-[10rem] font-bold tracking-[0.02em] leading-none flex"
                 style={{
                   textShadow: "0 4px 20px rgba(0,0,0,0.3)",
                 }}
@@ -492,101 +441,57 @@ export default function ReelSection() {
           </div>
         </div>
 
-        {/* Bottom row - Plus icons (default state) */}
+        {/* Bottom row - Plus icons (default state) - ORIGINAL PLACEMENT MAINTAINED */}
         <div
-          className="absolute -bottom-22 left-0 text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -bottom-22 left-0 text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -bottom-22 left-[25%] text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -bottom-22 left-[25%] text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -bottom-22 left-[50%] -translate-x-1/2 text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -bottom-22 left-[50%] -translate-x-1/2 text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -bottom-22 right-[25%] text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -bottom-22 right-[25%] text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
         <div
-          className="absolute -bottom-22 right-0 text-2xl font-medium text-black transition-opacity duration-300"
+          className="absolute -bottom-22 right-0 text-lg sm:text-xl md:text-2xl font-medium text-black transition-opacity duration-300"
           style={{ opacity: isPlayButtonHovered ? 0 : 1 }}
         >
           +
         </div>
 
-        {/* Marquee - Bottom row (scrolls RIGHT) */}
-        <div 
+        {/* Marquee - Bottom row (scrolls RIGHT) - ORIGINAL PLACEMENT MAINTAINED */}
+        <div
           className="absolute -bottom-22 left-0 right-0 overflow-hidden transition-opacity duration-300 whitespace-nowrap"
           style={{ opacity: isPlayButtonHovered ? 1 : 0 }}
         >
           <div className="marquee-right inline-flex">
-            <div className="flex items-center gap-60">
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
+            <div className="flex items-center gap-20 sm:gap-40 md:gap-60">
+              {[...Array(7)].map((_, i) => (
+                <span
+                  key={i}
+                  className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg lg:text-xl font-medium text-black"
+                >
+                  <span className="text-base sm:text-lg md:text-xl lg:text-2xl">
+                    ▶▶▶
+                  </span>
+                  <span className="tracking-wider">PLAY REEL</span>
+                </span>
+              ))}
             </div>
-            {/* Duplicate for seamless loop */}
-            {/* <div className="flex items-center gap-32">
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-              <span className="flex items-center gap-3 text-xl font-medium text-black">
-                <span className="text-2xl">▶▶▶</span>
-                <span className="tracking-wider">PLAY REEL</span>
-              </span>
-            </div> */}
           </div>
         </div>
       </div>

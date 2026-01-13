@@ -816,7 +816,7 @@ export default function ParticleHero() {
   const section2Ref = useRef<HTMLDivElement>(null);
   const section3Ref = useRef<HTMLDivElement>(null);
   const scrollCountRef = useRef(0);
-  const maxScrollSteps = 45;
+  const maxScrollSteps = 35;
 
   useEffect(() => {
     let isScrolling = false;

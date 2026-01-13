@@ -8,13 +8,20 @@
   box-sizing: border-box;
 }
 
+/* Hide scrollbar globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Helvetica', 'Arial', 'FreeSans', 'Garuda', sans-serif;
+  font-family: "Helvetica", "Arial", "FreeSans", "Garuda", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 #root {
@@ -30,7 +37,13 @@ html {
 }
 
 /* Remove default styles */
-h1, h2, h3, h4, h5, h6, p {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
   margin: 0;
   padding: 0;
   font-weight: normal;

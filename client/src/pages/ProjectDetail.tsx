@@ -20,12 +20,23 @@ export default function ProjectDetail() {
   const mediaRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [nextProjectProgress, setNextProjectProgress] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const project = id ? projectsData[id] : null;
 
-  // Add useEffect to reset scroll and state on page load
+  // Detect mobile/tablet
   useEffect(() => {
-    // Immediately reset everything on component mount or ID change
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // < 1024px is mobile/tablet
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Reset scroll and state on page load
+  useEffect(() => {
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
@@ -36,13 +47,11 @@ export default function ProjectDetail() {
     setMetaOpacity(1);
     setScrollProgress(0);
 
-    // Force reset container
     if (containerRef.current) {
       containerRef.current.style.opacity = "1";
       containerRef.current.style.transform = "scale(1)";
     }
 
-    // Small delay to ensure DOM is ready before allowing scroll
     const timeout = setTimeout(() => {
       window.scrollTo(0, 0);
     }, 50);
@@ -50,9 +59,9 @@ export default function ProjectDetail() {
     return () => clearTimeout(timeout);
   }, [id]);
 
-  // Update the scroll handler useEffect
+  // Scroll handler - DESKTOP ONLY
   useEffect(() => {
-    if (!project) return;
+    if (!project || isMobile) return;
 
     const handleScroll = () => {
       if (!containerRef.current || !carouselRef.current || isTransitioning)
@@ -68,21 +77,18 @@ export default function ProjectDetail() {
         return total + width + (index < project.media.length - 1 ? gapSize : 0);
       }, 0);
 
-      // Calculate when carousel reaches its MAXIMUM width (all assets scrolled through)
       const carouselStartPosition = window.innerWidth * 0.5;
       const carouselMaxScroll =
         totalCarouselWidth + carouselStartPosition - window.innerWidth;
 
-      // STOP carousel movement when it reaches max width
+      // Carousel movement
       if (scrolled < carouselMaxScroll) {
-        // Normal horizontal scroll
         gsap.to(carousel, {
           x: -scrolled,
           ease: "power2.out",
           duration: 0.3,
         });
       } else {
-        // FREEZE carousel at max scroll position
         gsap.to(carousel, {
           x: -carouselMaxScroll,
           ease: "power2.out",
@@ -90,12 +96,11 @@ export default function ProjectDetail() {
         });
       }
 
-      // Calculate when first image is fully visible
+      // Meta fade
       const firstImageWidth = 1346;
       const firstImageStartPos = window.innerWidth * 0.5;
       const scrollNeededToShowFull =
         firstImageStartPos - (window.innerWidth - firstImageWidth);
-
       const fadeStartScroll = scrollNeededToShowFull * 0.5;
       const fadeEndScroll = scrollNeededToShowFull;
 
@@ -109,14 +114,12 @@ export default function ProjectDetail() {
         setMetaOpacity(1 - fadeProgress);
       }
 
-      // Show next project ONLY when carousel reaches max width (end of all assets)
+      // Next project logic
       if (scrolled >= carouselMaxScroll) {
         if (!showNext) {
           setShowNext(true);
         }
 
-        // Progress bar fills based on CONTINUED scrolling after carousel ends
-        // Give large scroll distance for progress (4x window height for longer feel)
         const progressScrollDistance = window.innerHeight * 4;
         const scrollSinceCarouselEnd = scrolled - carouselMaxScroll;
         const progressValue = Math.min(
@@ -126,10 +129,8 @@ export default function ProjectDetail() {
 
         setNextProjectProgress(progressValue);
 
-        // Auto-navigate when progress reaches 100%
         if (progressValue >= 0.99 && !isTransitioning) {
           setIsTransitioning(true);
-
           window.removeEventListener("scroll", handleScroll);
 
           gsap.to(containerRef.current, {
@@ -139,16 +140,10 @@ export default function ProjectDetail() {
             ease: "power2.inOut",
             onComplete: () => {
               window.scrollTo(0, 0);
-              document.body.scrollTop = 0;
-              document.documentElement.scrollTop = 0;
-
               navigate(`/projects/${project.nextProject.id}`, {
                 replace: true,
               });
-
-              setTimeout(() => {
-                window.scrollTo(0, 0);
-              }, 0);
+              setTimeout(() => window.scrollTo(0, 0), 0);
             },
           });
         }
@@ -168,17 +163,15 @@ export default function ProjectDetail() {
       clearTimeout(timeout);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [project, showNext, navigate, isTransitioning, id]);
+  }, [project, showNext, navigate, isTransitioning, id, isMobile]);
 
-  // Update body height - carousel width + progress scroll distance
-  // Update body height - carousel max scroll + progress scroll distance
+  // Body height - DESKTOP ONLY
   useEffect(() => {
-    if (!carouselRef.current || !project) return;
+    if (!carouselRef.current || !project || isMobile) return;
 
     document.body.style.height = "";
 
     const timeout = setTimeout(() => {
-      // Calculate total carousel width
       const gapSize = 96;
       const totalCarouselWidth = project.media.reduce((total, item, index) => {
         const width = item.aspectRatio > 1 ? 1346 : 991;
@@ -188,9 +181,8 @@ export default function ProjectDetail() {
       const carouselStartPosition = window.innerWidth * 0.5;
       const carouselMaxScroll =
         totalCarouselWidth + carouselStartPosition - window.innerWidth;
-
-      // Body height = carousel max scroll + progress scroll distance (4x window height)
       const progressScrollDistance = window.innerHeight * 4;
+
       document.body.style.height = `${
         carouselMaxScroll + progressScrollDistance + window.innerHeight
       }px`;
@@ -200,9 +192,9 @@ export default function ProjectDetail() {
       clearTimeout(timeout);
       document.body.style.height = "";
     };
-  }, [project, id]);
+  }, [project, id, isMobile]);
 
-  // Entrance animation - morph from clicked card
+  // Entrance animation
   useEffect(() => {
     if (!project || !carouselRef.current) return;
 
@@ -210,11 +202,10 @@ export default function ProjectDetail() {
     const meta = metaRef.current;
 
     if (firstMedia && meta) {
-      // Reset and animate first media from right (off-screen) to its position
       gsap.fromTo(
         firstMedia,
         {
-          x: window.innerWidth * 0.2,
+          x: isMobile ? 50 : window.innerWidth * 0.2,
           scale: 0.95,
           opacity: 0,
         },
@@ -227,11 +218,10 @@ export default function ProjectDetail() {
         }
       );
 
-      // Animate meta info
       gsap.fromTo(
         meta,
         {
-          x: -100,
+          x: isMobile ? -30 : -100,
           opacity: 0,
         },
         {
@@ -243,16 +233,18 @@ export default function ProjectDetail() {
         }
       );
     }
-  }, [project, id]);
+  }, [project, id, isMobile]);
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
         <div className="text-center">
-          <h1 className="text-4xl mb-4">Project Not Found</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl mb-4">
+            Project Not Found
+          </h1>
           <button
             onClick={() => navigate("/projects")}
-            className="px-6 py-3 bg-white text-black rounded-full"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-white text-black rounded-full text-sm sm:text-base"
           >
             Back to Projects
           </button>
@@ -261,6 +253,179 @@ export default function ProjectDetail() {
     );
   }
 
+  // MOBILE VERSION - Vertical scroll layout
+  if (isMobile) {
+    return (
+      <div
+        ref={containerRef}
+        className="min-h-screen"
+        style={{ backgroundColor: project.backgroundColor }}
+      >
+        {/* Header */}
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <Header darkMode={project.textColor === "#ffffff"} />
+        </div>
+
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="fixed z-[60] bottom-8 left-8 px-6 py-3 bg-white text-black rounded-full font-medium text-sm tracking-wider hover:bg-opacity-90 hover:scale-105 transition-all flex items-center gap-2 shadow-lg"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M19 12H5M5 12L12 19M5 12L12 5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          BACK
+        </button>
+
+        {/* Content */}
+        <div className="pt-24 sm:pt-28 px-4 sm:px-6 pb-12 sm:pb-16">
+          {/* Project Meta */}
+          <div
+            ref={metaRef}
+            className="mb-8 sm:mb-12"
+            style={{ color: project.textColor }}
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal mb-4 sm:mb-6 leading-tight">
+              {project.title}
+            </h2>
+
+            <p className="text-sm sm:text-base leading-relaxed opacity-90 mb-6 sm:mb-8">
+              {project.description}
+            </p>
+
+            <div className="flex flex-col gap-6 sm:gap-8 mb-6 sm:mb-8">
+              <a
+                href={project.launchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-white text-black rounded-full text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                <span className="w-2 h-2 sm:w-3 sm:h-3 bg-black rounded-full"></span>
+                <span className="text-sm sm:text-base font-medium tracking-tighter">
+                  LAUNCH PROJECT
+                </span>
+                <svg
+                  width="20"
+                  height="20"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="sm:w-6 sm:h-6"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeWidth="1.5"
+                    d="M9 9h6m0 0v6m0-6-6 6"
+                  />
+                </svg>
+              </a>
+
+              <div className="space-y-2">
+                <h4 className="text-xs sm:text-sm uppercase tracking-wide opacity-70">
+                  Services
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {project.services.map((service, index) => (
+                    <span
+                      key={index}
+                      className="text-xs sm:text-sm px-3 py-1 rounded-full"
+                      style={{
+                        backgroundColor:
+                          project.textColor === "#ffffff"
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(0,0,0,0.1)",
+                      }}
+                    >
+                      {service}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Vertical Media Gallery */}
+          <div ref={carouselRef} className="space-y-4 sm:space-y-6">
+            {project.media.map((item, index) => (
+              <div
+                key={index}
+                ref={(el) => {
+                  mediaRefs.current[index] = el;
+                }}
+                className="media-item rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-800 shadow-xl"
+              >
+                {item.type === "image" ? (
+                  <img
+                    src={item.url}
+                    alt={`${project.title} - ${index + 1}`}
+                    className="w-full h-auto object-cover"
+                  />
+                ) : (
+                  <video
+                    src={item.url}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto object-cover"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Next Project CTA */}
+          <div
+            className="mt-12 sm:mt-16 p-6 sm:p-8 rounded-2xl sm:rounded-3xl"
+            style={{
+              backgroundColor: project.nextProject.backgroundColor,
+              color: project.nextProject.textColor,
+            }}
+          >
+            <p className="text-xs sm:text-sm uppercase tracking-widest opacity-60 mb-3 sm:mb-4">
+              NEXT PROJECT
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal mb-6 sm:mb-8 leading-tight whitespace-pre-line">
+              {project.nextProject.title}
+            </h2>
+            <button
+              onClick={() => navigate(`/projects/${project.nextProject.id}`)}
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-opacity hover:opacity-80"
+              style={{
+                backgroundColor: project.nextProject.textColor,
+                color: project.nextProject.backgroundColor,
+              }}
+            >
+              VIEW PROJECT
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="sm:w-5 sm:h-5"
+              >
+                <path
+                  d="M5 12H19M19 12L12 5M19 12L12 19"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // DESKTOP VERSION - Horizontal scroll
   return (
     <div
       ref={containerRef}
@@ -275,11 +440,11 @@ export default function ProjectDetail() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Header darkMode={project.textColor === "#ffffff"} />
       </div>
+
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="fixed z-40 px-8 py-4 bg-white text-black rounded-full font-medium text-sm tracking-wider hover:bg-opacity-90 transition-all flex items-center gap-2"
-        style={{ top: "40px", left: "50%", transform: "translateX(-50%)" }}
+        className="fixed z-[60] bottom-8 left-8 px-6 py-3 bg-white text-black rounded-full font-medium text-sm tracking-wider hover:bg-opacity-90 hover:scale-105 transition-all flex items-center gap-2 shadow-lg"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path
@@ -292,7 +457,8 @@ export default function ProjectDetail() {
         </svg>
         BACK
       </button>
-      {/* Horizontal Carousel - first image 70% visible from right */}
+
+      {/* Horizontal Carousel */}
       <div
         ref={carouselRef}
         className="fixed top-0 flex items-center gap-24"
@@ -310,7 +476,9 @@ export default function ProjectDetail() {
           return (
             <div
               key={index}
-              ref={(el) => {mediaRefs.current[index] = el}}
+              ref={(el) => {
+                mediaRefs.current[index] = el;
+              }}
               className="media-item flex-shrink-0 rounded-[2rem] overflow-hidden bg-gray-800 shadow-2xl"
               style={{
                 width: `${width}px`,
@@ -337,7 +505,8 @@ export default function ProjectDetail() {
           );
         })}
       </div>
-      {/* Project Meta - fades out when first image is fully visible */}
+
+      {/* Project Meta */}
       <div
         ref={metaRef}
         className="fixed left-16 top-1/2 -translate-y-1/2 z-30 max-w-xl transition-opacity duration-300"
@@ -352,7 +521,6 @@ export default function ProjectDetail() {
         </h2>
 
         <div className="flex gap-28">
-          {/* Left: Description & Launch Button */}
           <div className="space-y-10">
             <p className="text-md leading-relaxed opacity-90">
               {project.description}
@@ -378,7 +546,6 @@ export default function ProjectDetail() {
             </a>
           </div>
 
-          {/* Right: Services */}
           <div className="space-y-2">
             <h4 className="text-sm uppercase tracking-wide pb-4">Services</h4>
             {project.services.map((service, index) => (
@@ -410,9 +577,7 @@ export default function ProjectDetail() {
               NEXT PROJECT
             </span>
 
-            {/* Progress Bar - Clear LINE indicator */}
             <div className="relative w-64 h-[3px] rounded-full overflow-hidden">
-              {/* Background Line - Gray/Dimmed */}
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
@@ -420,8 +585,6 @@ export default function ProjectDetail() {
                   opacity: 0.2,
                 }}
               />
-
-              {/* Progress Fill Line - Full Color filling from left to right */}
               <div
                 className="absolute top-0 left-0 h-full rounded-full transition-all duration-300 ease-out"
                 style={{
@@ -436,7 +599,6 @@ export default function ProjectDetail() {
               />
             </div>
 
-            {/* Progress percentage text - larger and more visible */}
             <span
               className="text-lg font-medium tabular-nums tracking-wider"
               style={{ opacity: nextProjectProgress > 0 ? 0.8 : 0.4 }}
@@ -448,10 +610,6 @@ export default function ProjectDetail() {
               onClick={() => {
                 if (!isTransitioning) {
                   setIsTransitioning(true);
-
-                  // Remove scroll listener
-                  window.removeEventListener("scroll", () => {});
-
                   gsap.to(containerRef.current, {
                     opacity: 0,
                     scale: 0.95,
@@ -459,16 +617,9 @@ export default function ProjectDetail() {
                     ease: "power2.inOut",
                     onComplete: () => {
                       window.scrollTo(0, 0);
-                      document.body.scrollTop = 0;
-                      document.documentElement.scrollTop = 0;
-
                       navigate(`/projects/${project.nextProject.id}`, {
                         replace: true,
                       });
-
-                      setTimeout(() => {
-                        window.scrollTo(0, 0);
-                      }, 0);
                     },
                   });
                 }

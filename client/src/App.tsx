@@ -14,6 +14,7 @@ import PageLoader from './components/PageLoader'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import ProjectDetail from './pages/ProjectDetail'
+import { AudioProvider } from './contexts/AudioContext';
 
 import './index.css'
 
@@ -180,7 +181,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AudioProvider>
+        <AppContent />
+      </AudioProvider>
     </BrowserRouter>
   )
 }

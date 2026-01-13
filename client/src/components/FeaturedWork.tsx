@@ -213,6 +213,7 @@ export default function FeaturedWork() {
       <div className="flex justify-center">
         <button
           ref={buttonRef}
+          onClick={() => navigate('/projects')}
           className="group relative flex items-center gap-2 sm:gap-3 px-5 sm:px-6 md:px-7 lg:px-8 py-3 sm:py-3.5 md:py-4 bg-white text-black rounded-full text-sm sm:text-base md:text-lg font-medium hover:bg-[#0044ff] hover:text-white transition-all duration-300 shadow-lg border border-gray-200 overflow-hidden"
         >
           <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-black rounded-full group-hover:opacity-0 group-hover:scale-0 transition-all duration-300" />
